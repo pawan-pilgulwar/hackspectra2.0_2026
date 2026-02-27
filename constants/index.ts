@@ -1,13 +1,13 @@
 // ─── EVENT CONFIGURATION ────────────────────────────────────────────────────
 // Change this single variable to update the countdown timer across the site
-export const EVENT_DATE = "2025-04-22T09:00:00";
+export const EVENT_DATE = "2026-03-28T09:00:00";
 
-export const EVENT_NAME = "HackSpectra";
-export const EVENT_TAGLINE = "Metaverse Beyond Reality";
+export const EVENT_NAME = "HackSpectra 2.0";
+export const EVENT_TAGLINE = "Code · Innovation · Future";
 export const EVENT_DURATION = "24-Hour Hackathon";
-export const EVENT_DATE_DISPLAY = "April 22, 2025";
+export const EVENT_DATE_DISPLAY = "28–29 March 2026";
 export const TEAM_SIZE = "2–4 Members";
-export const TOTAL_TEAMS = "45 Teams";
+export const TOTAL_TEAMS = "100+ Teams";
 
 // ─── REGISTRATION LINKS ─────────────────────────────────────────────────────
 export const STUDENT_REG_URL =
@@ -28,10 +28,10 @@ export const NAV_LINKS = [
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
 export const STATS = [
-  { value: "45+", label: "Teams" },
+  { value: "1000+", label: "Attendees" },
+  { value: "100+", label: "Teams Registered" },
+  { value: "₹1L+", label: "Sponsorship Raised" },
   { value: "24H", label: "Hackathon" },
-  { value: "2-4", label: "Members/Team" },
-  { value: "₹1L+", label: "Prize Pool" },
 ];
 
 // ─── WHY JOIN ────────────────────────────────────────────────────────────────
@@ -266,18 +266,23 @@ export const FAQ_ITEMS = [
 
 // ─── SPONSORS ────────────────────────────────────────────────────────────────
 export const SPONSORS = [
-  { name: "MGM's College of Engineering", tier: "Host" },
+  { name: "MGM's College of Engineering, Nanded", tier: "Host" },
   { name: "Department of CSE", tier: "Host" },
-  { name: "Community Partner 1", tier: "Gold" },
-  { name: "Community Partner 2", tier: "Silver" },
-  { name: "Community Partner 3", tier: "Silver" },
-  { name: "Community Partner 4", tier: "Bronze" },
+  { name: "LIC Life Insurance", tier: "Past Sponsor" },
+  { name: "State Bank of India", tier: "Past Sponsor" },
+  { name: "Shree Cement", tier: "Past Sponsor" },
+  { name: "Bank of Maharashtra", tier: "Past Sponsor" },
+  { name: "Deshmukh Gym", tier: "Past Sponsor" },
 ];
 
 // ─── CONTACT ─────────────────────────────────────────────────────────────────
 export const CONTACT = {
-  venue: "Department of Computer Science & Engineering (CSE), MGM's College of Engineering, Nanded",
-  phones: ["8767085869", "9021226872"],
+  venue:
+    "Department of Computer Science & Engineering (CSE), MGM's College of Engineering, Nanded",
+  phones: [
+    "+91-9527184594  -->  Nagarjun Tumma",  // Nagarjun Tumma
+    "+91-9359546458  -->  Pranjal Shahane", // Pranjal Shahane
+  ],
   email: "hackspectra@mgmcen.ac.in",
   socials: {
     instagram: "#",

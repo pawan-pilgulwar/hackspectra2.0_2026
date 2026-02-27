@@ -59,10 +59,13 @@ export default function Prizes() {
                                 </h3>
 
                                 {/* Amount */}
-                                <div
-                                    className={`font-orbitron font-black text-2xl bg-gradient-to-r ${prize.gradient} bg-clip-text text-transparent mb-4`}
-                                >
-                                    {prize.amount}
+                                <div className="mb-4">
+                                    <div
+                                        className={`font-orbitron font-black text-2xl text-white drop-shadow-xl glow-effect`}
+                                    >
+                                        {prize.amount}
+                                    </div>
+                                    <div className="text-xs text-slate-300 mt-1 tracking-wider uppercase">Prize Money</div>
                                 </div>
 
                                 {/* Divider */}
