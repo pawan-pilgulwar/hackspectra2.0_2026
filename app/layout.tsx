@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Orbitron } from "next/font/google";
 import "./globals.css";
+import { EVENT_NAME, EVENT_TAGLINE, EVENT_DURATION, TEAM_SIZE, EVENT_YEAR, TOTAL_TEAMS } from "@/constants";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,23 +17,21 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "HackSpectra 2025 — Metaverse Beyond Reality",
-  description:
-    "HackSpectra is a 24-hour hackathon by MGM's College of Engineering, Nanded. 45 teams, cutting-edge technology, amazing prizes, and an unforgettable experience. Register now!",
+  title: `${EVENT_NAME} — ${EVENT_TAGLINE}`,
+  description: `${EVENT_NAME} is a ${EVENT_DURATION.toLowerCase()} by MGM's College of Engineering, Nanded. ${TOTAL_TEAMS} of ${TEAM_SIZE}, cutting-edge technology, amazing prizes, and an unforgettable experience. Register now!`,
   keywords: [
-    "HackSpectra",
+    EVENT_NAME,
     "hackathon",
     "MGM College of Engineering",
     "Nanded",
     "metaverse",
     "coding competition",
     "tech event",
-    "2025",
+    `${EVENT_YEAR}`,
   ],
   openGraph: {
-    title: "HackSpectra 2025 — Metaverse Beyond Reality",
-    description:
-      "Join 45 teams for a 24-hour hackathon at MGM's College of Engineering, Nanded. Compete, innovate, and win amazing prizes!",
+    title: `${EVENT_NAME} — ${EVENT_TAGLINE}`,
+    description: `Join ${TOTAL_TEAMS} for a ${EVENT_DURATION.toLowerCase()} at MGM's College of Engineering, Nanded. Compete, innovate, and win amazing prizes!`,
     type: "website",
   },
 };

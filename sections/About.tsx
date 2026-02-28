@@ -1,7 +1,7 @@
 "use client";
 
 import ScrollReveal from "@/components/ScrollReveal";
-import { STATS, WHY_JOIN } from "@/constants";
+import { STATS, WHY_JOIN, EVENT_NAME, EVENT_DURATION, TOTAL_TEAMS, TEAM_SIZE } from "@/constants";
 import { motion } from "framer-motion";
 
 export default function About() {
@@ -29,15 +29,15 @@ export default function About() {
                     <ScrollReveal direction="left">
                         <div className="space-y-6">
                             <p className="text-slate-300 font-inter text-lg leading-relaxed">
-                                HackSpectra is a{" "}
-                                <span className="text-metaverse-pink font-semibold">24-hour hackathon</span>{" "}
+                                {EVENT_NAME} is a{" "}
+                                <span className="text-metaverse-pink font-semibold">{EVENT_DURATION}</span>{" "}
                                 by{" "}
                                 <span className="text-metaverse-slate font-semibold">
                                     MGM's College of Engineering, Nanded
                                 </span>
                                 , bringing together{" "}
-                                <span className="text-white font-semibold">45 teams</span> of 2 to 4
-                                members to tackle real-world challenges through innovation and
+                                <span className="text-white font-semibold break-words">{TOTAL_TEAMS}</span> of {TEAM_SIZE}
+                                to tackle real-world challenges through innovation and
                                 collaboration.
                             </p>
                             <p className="text-slate-400 font-inter text-base leading-relaxed">

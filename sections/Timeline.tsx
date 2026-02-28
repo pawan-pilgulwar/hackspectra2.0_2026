@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
-import { TIMELINE } from "@/constants";
+import { TIMELINE, EVENT_NAME } from "@/constants";
 import { useInView } from "react-intersection-observer";
 
 function TimelineCard({
@@ -18,10 +18,11 @@ function TimelineCard({
     const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: true });
 
     return (
-        <div ref={ref} className="relative flex items-center justify-center">
+        // add padding on small screens to make room for the bubble/line
+        <div ref={ref} className="relative flex items-center justify-center pl-12 lg:pl-0">
             {/* Vertical connector line */}
             {!isLast && (
-                <div className="absolute top-12 bottom-0 left-1/2 -translate-x-1/2 w-px">
+                <div className="absolute top-12 bottom-0 left-4 lg:left-1/2 lg:-translate-x-1/2 w-px">
                     <motion.div
                         initial={{ scaleY: 0 }}
                         animate={inView ? { scaleY: 1 } : { scaleY: 0 }}
@@ -36,7 +37,7 @@ function TimelineCard({
                 initial={{ scale: 0, opacity: 0 }}
                 animate={inView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="absolute left-1/2 -translate-x-1/2 z-10 w-12 h-12 rounded-full glass border border-metaverse-pink/60 flex items-center justify-center shadow-meta text-xl"
+                className="absolute left-4 lg:left-1/2 lg:-translate-x-1/2 z-10 w-12 h-12 rounded-full glass border border-metaverse-pink/60 flex items-center justify-center shadow-meta text-xl"
             >
                 {item.icon}
             </motion.div>
@@ -96,11 +97,11 @@ export default function Timeline() {
                     <span className="inline-block text-xs font-inter font-semibold tracking-[0.3em] uppercase text-metaverse-pink mb-3">
                         Event Structure
                     </span>
-                    <h2 className="font-orbitron font-bold text-3xl sm:text-4xl lg:text-5xl text-white section-underline">
-                        Hackathon <span className="gradient-text">Flow</span>
+                    <h2 className="font-orbitron font-bold text-3xl sm:text-4xl lg:text-5xl text-white section-underline break-words">
+                        {EVENT_NAME} <span className="gradient-text">Flow</span>
                     </h2>
                     <p className="mt-6 text-slate-400 font-inter text-base max-w-xl mx-auto">
-                        The structured approach we follow for HackSpectra — from kickoff to
+                        The structured approach we follow for {EVENT_NAME} — from kickoff to
                         closing ceremony.
                     </p>
                 </ScrollReveal>

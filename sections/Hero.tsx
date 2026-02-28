@@ -4,10 +4,11 @@ import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import CountdownTimer from "@/components/CountdownTimer";
 import {
+    EVENT_NAME,
+    EVENT_TAGLINE,
     EVENT_DATE_DISPLAY,
     EVENT_DURATION,
     STUDENT_REG_URL,
-    EXPERT_REG_URL,
     TEAM_SIZE,
 } from "@/constants";
 
@@ -60,8 +61,20 @@ export default function Hero() {
                     className="mb-4"
                 >
                     <h1 className="font-orbitron font-black text-4xl sm:text-6xl md:text-8xl lg:text-8xl leading-none tracking-tighter break-words">
-                        <span className="gradient-text text-glow-pink">HACK</span>
-                        <span className="text-white text-glow-white">SPECTRA</span>
+                        {/* first word gradient, rest white */}
+                        {(() => {
+                            const parts = EVENT_NAME.split(" ");
+                            const first = parts.shift();
+                            const rest = parts.join(" ");
+                            return (
+                                <>
+                                    <span className="gradient-text text-glow-pink">{first}</span>
+                                    {rest && (
+                                        <span className="text-white text-glow-white"> {rest}</span>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </h1>
                 </motion.div>
 
@@ -74,7 +87,7 @@ export default function Hero() {
                 >
                     <div className="meta-line w-32 sm:w-64 mx-auto mb-6" />
                     <p className="font-orbitron text-lg sm:text-xl md:text-2xl tracking-widest uppercase text-metaverse-pink text-glow-pink">
-                        Metaverse Beyond Reality
+                        {EVENT_TAGLINE}
                     </p>
                     <div className="meta-line w-32 sm:w-64 mx-auto mt-6" />
                 </motion.div>

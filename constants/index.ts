@@ -3,17 +3,18 @@
 export const EVENT_DATE = "2026-03-28T09:00:00";
 
 export const EVENT_NAME = "HackSpectra 2.0";
-export const EVENT_TAGLINE = "Code · Innovation · Future";
+export const EVENT_TAGLINE = "Metaverse: Code Beyond Reality";
 export const EVENT_DURATION = "24-Hour Hackathon";
 export const EVENT_DATE_DISPLAY = "28–29 March 2026";
 export const TEAM_SIZE = "2–4 Members";
-export const TOTAL_TEAMS = "100+ Teams";
+export const TOTAL_TEAMS = "50 Teams Only";
+
+// derived values
+export const EVENT_YEAR = new Date(EVENT_DATE).getFullYear();
 
 // ─── REGISTRATION LINKS ─────────────────────────────────────────────────────
 export const STUDENT_REG_URL =
   "https://unstop.com/o/l1tyF2T?lb=Z8t5GW62";
-export const EXPERT_REG_URL =
-  "https://unstop.com/o/dj4okxE?lb=Z8t5GW62";
 
 // ─── NAVIGATION ─────────────────────────────────────────────────────────────
 export const NAV_LINKS = [
@@ -28,85 +29,88 @@ export const NAV_LINKS = [
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
 export const STATS = [
-  { value: "1000+", label: "Attendees" },
-  { value: "100+", label: "Teams Registered" },
-  { value: "₹1L+", label: "Sponsorship Raised" },
+  { value: "50", label: "Teams Only" },
+  { value: "2–4", label: "Members / Team" },
   { value: "24H", label: "Hackathon" },
+  { value: "₹1,00,000+", label: "Prize Pool" },
 ];
 
 // ─── WHY JOIN ────────────────────────────────────────────────────────────────
 export const WHY_JOIN = [
-  {
-    icon: "💡",
-    title: "Real-World Challenges",
-    desc: "Work on cutting-edge tech problems that matter",
-  },
-  {
-    icon: "🏆",
-    title: "Amazing Prizes",
-    desc: "Win cash prizes, swags, and certificates",
-  },
-  {
-    icon: "📄",
-    title: "Boost Your Resume",
-    desc: "Gain hands-on hackathon experience",
-  },
-  {
-    icon: "🎉",
-    title: "Fun & Entertainment",
-    desc: "Cultural night, midnight games & free goodies",
-  },
+  { icon: "💡", title: "Real-World Challenges", desc: "Work on cutting-edge tech problems that matter" },
+  { icon: "🏆", title: "Amazing Prizes", desc: "Win cash prizes, swags, and certificates" },
+  { icon: "📄", title: "Boost Your Resume", desc: "Gain hands-on hackathon experience" },
+  { icon: "🎉", title: "Fun & Entertainment", desc: "Cultural night, midnight games & free goodies" },
+  { icon: "📜", title: "Certificate", desc: "Participation certificates for all teams" },
+  { icon: "🎭", title: "Cultural Night", desc: "Fun-filled cultural night experience" },
+  { icon: "🎮", title: "Midnight Games", desc: "Engaging midnight games & activities" },
+  { icon: "🎁", title: "Free Goodies", desc: "Exciting goodies for participants" },
 ];
 
 // ─── TRACKS ─────────────────────────────────────────────────────────────────
 export const TRACKS = [
-  {
-    icon: "🤖",
-    title: "AI & Robotics",
-    description:
-      "Develop intelligent automation and robotic solutions to enhance efficiency and transform industries.",
-    color: "from-metaverse-pink to-metaverse-plum",
-    glow: "shadow-meta-pink",
+  { 
+    icon: "🌾", 
+    title: "Agriculture", 
+    description: "Innovative tech solutions for agriculture.",
+    color: "from-metaverse-green to-metaverse-beige",
+    glow: "shadow-meta-green",
   },
-  {
-    icon: "📊",
-    title: "Data Science",
-    description:
-      "Utilize big data and analytics for smarter insights, predictions, and decision-making.",
-    color: "from-metaverse-slate to-metaverse-dark-blue",
-    glow: "shadow-meta-slate",
-  },
-  {
-    icon: "🏥",
-    title: "Health Technology",
-    description:
-      "Innovate healthcare with AI, telemedicine, and smart medical solutions that save lives.",
+  { 
+    icon: "🏥", 
+    title: "Healthcare", 
+    description: "Smart healthcare & medical innovations.",
     color: "from-metaverse-plum to-metaverse-navy",
     glow: "shadow-meta",
   },
-  {
-    icon: "🎓",
-    title: "Education Technology",
-    description:
-      "Transform learning experiences with AI-driven and interactive educational tools.",
+  { 
+    icon: "🎓", 
+    title: "Education", 
+    description: "Next-gen education & learning platforms.",
     color: "from-metaverse-pink to-metaverse-beige",
-    glow: "shadow-meta-pink",
+    glow: "shadow-meta-pink", 
   },
-  {
-    icon: "⛓️",
-    title: "Blockchain",
-    description:
-      "Build secure, decentralized systems for transparency, trust, and financial inclusion.",
+  { 
+    icon: "🏙️", 
+    title: "Smart City", 
+    description: "Technology-driven smart city solutions.",
+    color: "from-metaverse-slate to-metaverse-dark-blue",
+    glow: "shadow-meta-slate", 
+  },
+  { 
+    icon: "🌪️", 
+    title: "Disaster Management", 
+    description: "Disaster prediction & response systems.",
+    color: "from-metaverse-navy to-metaverse-plum",
+    glow: "shadow-meta",
+  },
+  { 
+    icon: "🔐", 
+    title: "Cybersecurity", 
+    description: "Security, privacy & cyber defense solutions.",
     color: "from-metaverse-dark-blue to-metaverse-slate",
     glow: "shadow-meta-slate",
   },
-  {
-    icon: "💡",
-    title: "Students Innovation",
-    description:
-      "An open platform for groundbreaking and creative student ideas — no limits, pure innovation.",
+  { 
+    icon: "🚗", 
+    title: "Transportation & Tourism", 
+    description: "Smart mobility & tourism tech.",
+    color: "from-metaverse-beige to-metaverse-pink",
+    glow: "shadow-meta-pink", 
+  },
+  { 
+    icon: "👩‍👧", 
+    title: "Women & Child Development", 
+    description: "Empowerment-focused innovations.",
+    color: "from-metaverse-pink to-metaverse-plum",
+    glow: "shadow-meta-pink", 
+  },
+  { 
+    icon: "💡", 
+    title: "Student Innovation", 
+    description: "Open innovation for creative student ideas.",
     color: "from-metaverse-plum to-metaverse-pink",
-    glow: "shadow-meta",
+    glow: "shadow-meta", 
   },
 ];
 
@@ -183,7 +187,7 @@ export const PRIZES = [
     label: "Grand Champion",
     amount: "₹25,000+",
     icon: "🥇",
-    perks: ["Cash Prize", "Swag Kit", "Certificates", "Mentorship Opportunity"],
+    perks: ["Cash Prize", "Goodies", "Certificates", "Mentorship Opportunity"],
     gradient: "from-metaverse-pink via-metaverse-plum to-metaverse-navy",
     glow: "shadow-meta-pink",
     border: "border-metaverse-pink/50",
@@ -193,7 +197,7 @@ export const PRIZES = [
     label: "First Runner-Up",
     amount: "₹15,000+",
     icon: "🥈",
-    perks: ["Cash Prize", "Swag Kit", "Certificates", "Industry Connect"],
+    perks: ["Cash Prize", "Goodies", "Certificates", "Industry Connect"],
     gradient: "from-metaverse-slate via-metaverse-dark-blue to-metaverse-navy",
     glow: "shadow-meta-slate",
     border: "border-metaverse-slate/50",
@@ -203,7 +207,7 @@ export const PRIZES = [
     label: "Second Runner-Up",
     amount: "₹10,000+",
     icon: "🥉",
-    perks: ["Cash Prize", "Swag Kit", "Certificates"],
+    perks: ["Cash Prize", "Goodies", "Certificates"],
     gradient: "from-metaverse-plum via-metaverse-navy to-metaverse-dark-blue",
     glow: "shadow-meta",
     border: "border-metaverse-plum/50",
@@ -213,7 +217,7 @@ export const PRIZES = [
     label: "Track Winners",
     amount: "Goodies + Swag",
     icon: "🎁",
-    perks: ["Domain Certificates", "Swag Kit", "Recognition"],
+    perks: ["Domain Certificates", "Goodies", "Recognition"],
     gradient: "from-metaverse-pink via-metaverse-beige to-metaverse-slate",
     glow: "shadow-meta-pink",
     border: "border-metaverse-beige/50",
@@ -223,9 +227,9 @@ export const PRIZES = [
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
 export const FAQ_ITEMS = [
   {
-    question: "Who can participate in HackSpectra?",
+    question: `Who can participate in ${EVENT_NAME}?`,
     answer:
-      "HackSpectra is open to all college students with a passion for technology and innovation. You can register as a student (₹800) or expert (₹1000).",
+      `${EVENT_NAME} is open to all college students with a passion for technology and innovation. You can register as a student (₹800) or expert (₹1000).`,
   },
   {
     question: "What is the team size requirement?",
@@ -268,6 +272,8 @@ export const FAQ_ITEMS = [
 export const SPONSORS = [
   { name: "MGM's College of Engineering, Nanded", tier: "Host" },
   { name: "Department of CSE", tier: "Host" },
+  { name: "Institution of Engineers (India) – IEI Student Chapter, MGMCOE", tier: "Organizer" },
+  { name: "Google Developer Groups – On Campus MGMCOE", tier: "Organizer" },
   { name: "LIC Life Insurance", tier: "Past Sponsor" },
   { name: "State Bank of India", tier: "Past Sponsor" },
   { name: "Shree Cement", tier: "Past Sponsor" },
@@ -284,10 +290,12 @@ export const CONTACT = {
     "+91-9359546458  -->  Pranjal Shahane", // Pranjal Shahane
   ],
   email: "hackspectra@mgmcen.ac.in",
+  facultyCoordinators: [
+    "Dr. B. S. Kapre",
+    "Mr. H. U. Joshi",
+  ],
   socials: {
-    instagram: "#",
-    twitter: "#",
-    linkedin: "#",
-    github: "#",
+    instagram: "https://instagram.com/hackspectra_mgm",
+    website: "https://hackspectra.netlify.app",
   },
 };

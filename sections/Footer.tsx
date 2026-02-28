@@ -2,15 +2,13 @@
 
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
-import { CONTACT, STUDENT_REG_URL, EXPERT_REG_URL, NAV_LINKS } from "@/constants";
+import { CONTACT, STUDENT_REG_URL, NAV_LINKS, EVENT_NAME, EVENT_YEAR, EVENT_DURATION } from "@/constants";
 import {
     FiMail,
     FiPhone,
     FiMapPin,
     FiInstagram,
-    FiTwitter,
-    FiLinkedin,
-    FiGithub,
+    FiGlobe,
 } from "react-icons/fi";
 import { RiSpeedUpFill } from "react-icons/ri";
 
@@ -114,7 +112,7 @@ export default function Footer() {
                                 <span className="gradient-text">Hack the Future</span>?
                             </h3>
                             <p className="text-slate-300 font-inter text-base mb-8 max-w-lg mx-auto">
-                                Join HackSpectra 2025 — 24 hours to build, innovate, and win amazing prizes!
+                                Join {EVENT_NAME} {EVENT_YEAR} — {EVENT_DURATION.toLowerCase()} to build, innovate, and win amazing prizes!
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <a
@@ -162,9 +160,7 @@ export default function Footer() {
                         <div className="flex items-center gap-3">
                             {[
                                 { Icon: FiInstagram, href: CONTACT.socials.instagram, label: "Instagram" },
-                                { Icon: FiTwitter, href: CONTACT.socials.twitter, label: "Twitter" },
-                                { Icon: FiLinkedin, href: CONTACT.socials.linkedin, label: "LinkedIn" },
-                                { Icon: FiGithub, href: CONTACT.socials.github, label: "GitHub" },
+                                { Icon: FiGlobe, href: CONTACT.socials.website, label: "Website" },
                             ].map(({ Icon, href, label }) => (
                                 <a
                                     key={label}
@@ -181,7 +177,7 @@ export default function Footer() {
                     {/* Copyright */}
                     <div className="mt-6 pt-6 border-t border-white/5 text-center">
                         <p className="text-slate-600 font-inter text-xs">
-                            © 2025 HackSpectra — MGM&apos;s College of Engineering, Nanded. All rights reserved.
+                            © {EVENT_YEAR} {EVENT_NAME} — MGM&apos;s College of Engineering, Nanded. All rights reserved.
                             <span className="mx-2 text-slate-700">·</span>
                             Built with ❤️ for Innovation
                         </p>

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
-import { TRACKS } from "@/constants";
+import { TRACKS, EVENT_NAME } from "@/constants";
 
 export default function Tracks() {
     return (
@@ -16,8 +16,8 @@ export default function Tracks() {
                     <span className="inline-block text-xs font-inter font-semibold tracking-[0.3em] uppercase text-metaverse-pink mb-3">
                         Innovation Domains
                     </span>
-                    <h2 className="font-orbitron font-bold text-3xl sm:text-4xl lg:text-5xl text-white section-underline">
-                        HackSpectra{" "}
+                    <h2 className="font-orbitron font-bold text-3xl sm:text-4xl lg:text-5xl text-white section-underline break-words">
+                        {EVENT_NAME}{" "}
                         <span className="gradient-text">Themes</span>
                     </h2>
                     <p className="mt-6 text-slate-400 font-inter text-base max-w-2xl mx-auto">
@@ -32,7 +32,7 @@ export default function Tracks() {
                             <motion.div
                                 whileHover={{ y: -8, scale: 1.02 }}
                                 transition={{ type: "spring", stiffness: 280, damping: 20 }}
-                                className={`relative group rounded-2xl p-6 glass border border-white/5 hover:${track.glow} hover:border-metaverse-pink/30 transition-all duration-400 overflow-hidden cursor-default h-full`}
+                                className={`relative group rounded-2xl p-6 glass border border-white/5 hover:${track.glow} hover:border-metaverse-pink/30 transition-all duration-400 overflow-hidden cursor-default h-full text-center`}
                             >
                                 {/* Gradient overlay on hover */}
                                 <div
