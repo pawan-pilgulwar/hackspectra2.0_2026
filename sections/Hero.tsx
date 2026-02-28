@@ -59,7 +59,7 @@ export default function Hero() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="mb-4"
                 >
-                    <h1 className="font-orbitron font-black text-6xl sm:text-7xl md:text-8xl lg:text-9xl leading-none tracking-tighter">
+                    <h1 className="font-orbitron font-black text-4xl sm:text-6xl md:text-8xl lg:text-8xl leading-none tracking-tighter break-words">
                         <span className="gradient-text text-glow-pink">HACK</span>
                         <span className="text-white text-glow-white">SPECTRA</span>
                     </h1>
@@ -72,11 +72,11 @@ export default function Hero() {
                     transition={{ duration: 0.7, delay: 0.4 }}
                     className="mb-6"
                 >
-                    <div className="meta-line w-64 mx-auto mb-6" />
+                    <div className="meta-line w-32 sm:w-64 mx-auto mb-6" />
                     <p className="font-orbitron text-lg sm:text-xl md:text-2xl tracking-widest uppercase text-metaverse-pink text-glow-pink">
                         Metaverse Beyond Reality
                     </p>
-                    <div className="meta-line w-64 mx-auto mt-6" />
+                    <div className="meta-line w-32 sm:w-64 mx-auto mt-6" />
                 </motion.div>
 
                 {/* Description */}
@@ -84,7 +84,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.55 }}
-                    className="text-slate-400 font-inter text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed"
+                    className="text-slate-400 font-inter text-base sm:text-lg max-w-xs sm:max-w-2xl mx-auto mb-10 leading-relaxed"
                 >
                     A 24-hour hackathon by{" "}
                     <span className="text-metaverse-pink font-semibold">
@@ -124,15 +124,6 @@ export default function Hero() {
                         <span className="relative z-10 flex items-center gap-2">
                             ⚡ Register as Student
                         </span>
-                    </a>
-
-                    <a
-                        href={EXPERT_REG_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-8 py-4 rounded-xl font-inter font-bold text-base text-metaverse-pink glass border border-metaverse-pink/40 hover:border-metaverse-pink/60 hover:text-white hover:shadow-meta transition-all duration-300 hover:scale-105"
-                    >
-                        🎓 Register as Expert
                     </a>
 
                     <button

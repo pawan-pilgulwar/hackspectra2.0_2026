@@ -81,7 +81,7 @@ export default function CountdownTimer() {
     }
 
     return (
-        <div className="flex items-center gap-3 sm:gap-6">
+        <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
             <DigitCard value={timeLeft.days} label="Days" />
             <span className="font-orbitron text-2xl sm:text-3xl text-purple-400 font-bold self-start mt-3">
                 :

@@ -125,14 +125,6 @@ export default function Footer() {
                                 >
                                     ⚡ Student Registration
                                 </a>
-                                <a
-                                    href={EXPERT_REG_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-8 py-3.5 rounded-xl font-inter font-semibold text-sm text-metaverse-pink glass border border-metaverse-pink/40 hover:border-metaverse-pink/60 hover:shadow-meta transition-all duration-200"
-                                >
-                                    🎓 Expert Registration
-                                </a>
                             </div>
                         </div>
                     </div>
