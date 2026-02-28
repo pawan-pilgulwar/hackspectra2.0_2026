@@ -40,7 +40,7 @@ export default function Sponsors() {
     return (
         <section
             id="sponsors"
-            className="relative py-24 lg:py-32 bg-dark-100 overflow-hidden"
+            className="relative py-24 lg:py-32 bg-dark-100 meta-pattern overflow-hidden"
         >
             <div className="absolute top-0 left-0 right-0 h-px neon-line opacity-30" />
             <div className="absolute top-1/2 right-0 w-80 h-80 rounded-full bg-cyan-600/6 blur-3xl pointer-events-none" />

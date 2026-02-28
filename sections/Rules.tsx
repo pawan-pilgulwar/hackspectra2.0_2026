@@ -6,7 +6,7 @@ import { RULES } from "@/constants";
 
 export default function Rules() {
     return (
-        <section id="rules" className="relative py-24 lg:py-32 bg-dark overflow-hidden">
+        <section id="rules" className="relative py-24 lg:py-32 bg-dark meta-pattern overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px neon-line opacity-30" />
             <div className="absolute top-1/2 -right-40 w-80 h-80 rounded-full bg-blue-600/8 blur-3xl pointer-events-none" />
             <div className="absolute inset-0 grid-bg opacity-15" />

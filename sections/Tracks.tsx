@@ -6,10 +6,10 @@ import { TRACKS, EVENT_NAME } from "@/constants";
 
 export default function Tracks() {
     return (
-        <section id="tracks" className="relative py-24 lg:py-32 bg-metaverse-navy overflow-hidden">
+        <section id="tracks" className="relative py-24 lg:py-32 bg-metaverse-navy meta-pattern overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px meta-line opacity-30" />
             <div className="absolute -top-60 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-metaverse-pink/5 blur-3xl pointer-events-none" />
-            <div className="absolute inset-0 grid-bg opacity-10" />
+            <div className="absolute inset-0 grid-bg opacity-8" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <ScrollReveal className="text-center mb-16">

@@ -12,7 +12,7 @@ const config: Config = {
       colors: {
         metaverse: {
           navy: "#142030",
-          pink: "#ff2d7d",
+          pink: "#00c1ff",
           plum: "#732654",
           beige: "#E9D8C8",
           slate: "#86A3B3",
@@ -31,7 +31,7 @@ const config: Config = {
         inter: ["var(--font-inter)", "sans-serif"],
       },
       backgroundImage: {
-        "meta-gradient": "linear-gradient(135deg, #142030, #732654, #ff2d7d)",
+        "meta-gradient": "linear-gradient(135deg, #142030, #732654, #00c1ff)",
         "card-gradient":
           "linear-gradient(135deg, rgba(115,38,84,0.1), rgba(20,32,48,0.2))",
         "hero-gradient":

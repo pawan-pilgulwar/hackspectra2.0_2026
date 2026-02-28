@@ -22,12 +22,12 @@ function TimelineCard({
         <div ref={ref} className="relative flex items-center justify-center pl-12 lg:pl-0">
             {/* Vertical connector line */}
             {!isLast && (
-                <div className="absolute top-12 bottom-0 left-4 lg:left-1/2 lg:-translate-x-1/2 w-px">
+                <div className="absolute top-12 bottom-0 left-4 lg:left-1/2 lg:-translate-x-1/2 w-1 lg:w-2">
                     <motion.div
                         initial={{ scaleY: 0 }}
                         animate={inView ? { scaleY: 1 } : { scaleY: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="origin-top w-full h-full bg-gradient-to-b from-metaverse-pink to-metaverse-plum opacity-40"
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="origin-top w-full h-full bg-gradient-to-b from-metaverse-beige/40 via-metaverse-pink/70 to-metaverse-plum/60 opacity-90"
                     />
                 </div>
             )}
@@ -36,8 +36,8 @@ function TimelineCard({
             <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={inView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="absolute left-4 lg:left-1/2 lg:-translate-x-1/2 z-10 w-12 h-12 rounded-full glass border border-metaverse-pink/60 flex items-center justify-center shadow-meta text-xl"
+                transition={{ duration: 0.45, delay: 0.1 }}
+                className="absolute left-4 lg:left-1/2 lg:-translate-x-1/2 z-10 w-14 h-14 rounded-full glass-dark border border-metaverse-beige/20 flex items-center justify-center shadow-meta text-2xl"
             >
                 {item.icon}
             </motion.div>
@@ -69,10 +69,10 @@ function TimelineCard({
                                 STEP {item.step}
                             </span>
                         </div>
-                        <h3 className="font-orbitron font-bold text-lg text-white mb-2 group-hover:gradient-text transition-all">
+                        <h3 className="font-orbitron font-bold text-xl sm:text-2xl text-white mb-2 group-hover:gradient-text transition-all">
                             {item.title}
                         </h3>
-                        <p className="text-slate-400 font-inter text-sm leading-relaxed">
+                        <p className="text-slate-300 font-inter text-sm sm:text-base leading-relaxed">
                             {item.description}
                         </p>
                     </div>
@@ -86,7 +86,7 @@ export default function Timeline() {
     return (
         <section
             id="timeline"
-            className="relative py-24 lg:py-32 bg-metaverse-navy overflow-hidden"
+            className="relative py-24 lg:py-32 bg-metaverse-navy meta-pattern overflow-hidden"
         >
             <div className="absolute top-0 left-0 right-0 h-px meta-line opacity-30" />
             <div className="absolute -bottom-40 right-0 w-96 h-96 rounded-full bg-metaverse-pink/5 blur-3xl pointer-events-none" />

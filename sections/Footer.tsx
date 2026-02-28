@@ -18,7 +18,7 @@ export default function Footer() {
     };
 
     return (
-        <footer id="contact" className="relative bg-dark-200 overflow-hidden">
+        <footer id="contact" className="relative bg-dark-200 meta-pattern overflow-hidden">
             {/* Top divider */}
             <div className="h-px w-full neon-line opacity-50" />
 

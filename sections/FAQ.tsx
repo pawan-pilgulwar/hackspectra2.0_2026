@@ -83,10 +83,10 @@ function FAQItem({
 
 export default function FAQ() {
     return (
-        <section id="faq" className="relative py-24 lg:py-32 bg-metaverse-navy overflow-hidden">
+        <section id="faq" className="relative py-24 lg:py-32 bg-metaverse-navy meta-pattern overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px meta-line opacity-30" />
             <div className="absolute top-1/3 -left-40 w-80 h-80 rounded-full bg-metaverse-pink/5 blur-3xl pointer-events-none" />
-            <div className="absolute inset-0 grid-bg opacity-10" />
+            <div className="absolute inset-0 grid-bg opacity-8" />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <ScrollReveal className="text-center mb-16">

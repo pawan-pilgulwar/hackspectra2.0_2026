@@ -6,12 +6,12 @@ import { motion } from "framer-motion";
 
 export default function About() {
     return (
-        <section id="about" className="relative py-24 lg:py-32 bg-metaverse-navy overflow-hidden">
+        <section id="about" className="relative py-24 lg:py-32 bg-metaverse-navy meta-pattern overflow-hidden">
             {/* Background accents */}
             <div className="absolute top-0 left-0 right-0 h-px meta-line opacity-30" />
             <div className="absolute -top-40 right-0 w-80 h-80 rounded-full bg-metaverse-pink/5 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 -left-40 w-80 h-80 rounded-full bg-metaverse-plum/5 blur-3xl pointer-events-none" />
-            <div className="absolute inset-0 grid-bg opacity-10" />
+            <div className="absolute inset-0 grid-bg opacity-8" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Section header */}
@@ -43,8 +43,8 @@ export default function About() {
                             <p className="text-slate-400 font-inter text-base leading-relaxed">
                                 Beyond coding, participants can enjoy{" "}
                                 <span className="text-metaverse-pink">midnight games</span>, a{" "}
-                                <span className="text-metaverse-slate">cultural night</span>, and{" "}
-                                <span className="text-metaverse-plum">free goodies</span>, making it a
+                                <span className="text-metaverse-pink">cultural night</span>, and{" "}
+                                <span className="text-metaverse-pink">free goodies</span>, making it a
                                 thrilling and unforgettable experience!
                             </p>
                             <div className="flex flex-wrap gap-3 pt-2">

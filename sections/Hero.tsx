@@ -36,7 +36,7 @@ export default function Hero() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-metaverse-slate/5 blur-3xl pointer-events-none" />
 
             {/* Grid overlay */}
-            <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
+            <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
             {/* Content */}
             <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto pt-24">
@@ -68,9 +68,9 @@ export default function Hero() {
                             const rest = parts.join(" ");
                             return (
                                 <>
-                                    <span className="gradient-text text-glow-pink">{first}</span>
+                                    <span className="gradient-text text-glow-muted">{first}</span>
                                     {rest && (
-                                        <span className="text-white text-glow-white"> {rest}</span>
+                                        <span className="text-white text-glow-muted"> {rest}</span>
                                     )}
                                 </>
                             );
@@ -86,7 +86,7 @@ export default function Hero() {
                     className="mb-6"
                 >
                     <div className="meta-line w-32 sm:w-64 mx-auto mb-6" />
-                    <p className="font-orbitron text-lg sm:text-xl md:text-2xl tracking-widest uppercase text-metaverse-pink text-glow-pink">
+                    <p className="font-orbitron text-lg sm:text-xl md:text-2xl tracking-widest uppercase text-metaverse-pink text-glow-muted">
                         {EVENT_TAGLINE}
                     </p>
                     <div className="meta-line w-32 sm:w-64 mx-auto mt-6" />

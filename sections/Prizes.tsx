@@ -6,10 +6,10 @@ import { PRIZES, STUDENT_REG_URL } from "@/constants";
 
 export default function Prizes() {
     return (
-        <section id="prizes" className="relative py-24 lg:py-32 bg-metaverse-navy overflow-hidden">
+        <section id="prizes" className="relative py-24 lg:py-32 bg-metaverse-navy meta-pattern overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px meta-line opacity-30" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-metaverse-pink/5 blur-3xl pointer-events-none" />
-            <div className="absolute inset-0 grid-bg opacity-10" />
+            <div className="absolute inset-0 grid-bg opacity-8" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <ScrollReveal className="text-center mb-16">

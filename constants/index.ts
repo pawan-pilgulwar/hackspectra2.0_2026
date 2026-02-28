@@ -20,6 +20,7 @@ export const STUDENT_REG_URL =
 export const NAV_LINKS = [
   { label: "About", href: "#about" },
   { label: "Tracks", href: "#tracks" },
+  { label: "Problem Statements", href: "#problems" },
   { label: "Timeline", href: "#timeline" },
   { label: "Rules", href: "#rules" },
   { label: "Prizes", href: "#prizes" },
@@ -175,8 +176,8 @@ export const RULES = [
   "Internet access is provided, but no external human help.",
   "Projects will be judged on innovation, execution, and impact.",
   "Submissions must be made before the deadline.",
-  "Registration fee: ₹1000 for experts, ₹800 for students.",
-  "Problem statements will be allocated at the inauguration ceremony.",
+  "Registration fee: ₹600 with accomodation, ₹800 without accomodation.",
+  "Problem statements are display on website before the 10 days of event.",
   "Violations of rules may lead to immediate disqualification.",
 ];
 
