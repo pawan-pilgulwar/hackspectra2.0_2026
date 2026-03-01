@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, STUDENT_REG_URL } from "@/constants";
 import { FiMenu, FiX } from "react-icons/fi";
 import { RiSpeedUpFill } from "react-icons/ri";
+import Link from "next/link";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -53,14 +54,20 @@ export default function Navbar() {
                         {/* Desktop links */}
                         <div className="hidden lg:flex items-center gap-6">
                             {NAV_LINKS.map((link) => (
-                                <button
-                                    key={link.href}
-                                    onClick={() => scrollToSection(link.href)}
-                                    className="text-slate-300 hover:text-purple-400 font-inter text-sm font-medium transition-colors duration-200 relative group"
-                                >
-                                    {link.label}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-purple-500 to-cyan-400 group-hover:w-full transition-all duration-300" />
-                                </button>
+                                    !link.href.startsWith("#") ? (
+                                    <Link key={link.href} href={link.href} className="text-slate-300 hover:text-purple-400 font-inter text-sm font-medium transition-colors duration-200 relative group">
+                                        {link.label}
+                                    </Link>
+                                ) : (
+                                    <button
+                                        key={link.href}
+                                        onClick={() => scrollToSection(link.href)}
+                                        className="text-slate-300 hover:text-purple-400 font-inter text-sm font-medium transition-colors duration-200 relative group"
+                                    >
+                                        {link.label}
+                                        <span className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-purple-500 to-cyan-400 group-hover:w-full transition-all duration-300" />
+                                    </button>
+                                )
                             ))}
                             <a
                                 href={STUDENT_REG_URL}

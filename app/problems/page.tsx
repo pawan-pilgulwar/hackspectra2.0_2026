@@ -41,7 +41,7 @@ const SAMPLE_PROBLEMS: Problem[] = [
   },
 ];
 
-export default function ProblemStatements() {
+export default function Page() {
   const [problems, setProblems] = useState<Problem[]>(SAMPLE_PROBLEMS);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 

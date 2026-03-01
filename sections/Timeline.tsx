@@ -21,13 +21,22 @@ function TimelineCard({
         // add padding on small screens to make room for the bubble/line
         <div ref={ref} className="relative flex items-center justify-center pl-12 lg:pl-0">
             {/* Vertical connector line */}
-            {!isLast && (
+            {!isLast ? (
                 <div className="absolute top-12 bottom-0 left-4 lg:left-1/2 lg:-translate-x-1/2 w-1 lg:w-2">
                     <motion.div
                         initial={{ scaleY: 0 }}
                         animate={inView ? { scaleY: 1 } : { scaleY: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="origin-top w-full h-full bg-gradient-to-b from-metaverse-beige/40 via-metaverse-pink/70 to-metaverse-plum/60 opacity-90"
+                    />
+                </div>
+            ) : (
+                <div className="absolute top-12 bottom-0 left-4 lg:left-1/2 lg:-translate-x-1/2 w-1 lg:w-2">
+                    <motion.div
+                        initial={{ scaleY: 0 }}
+                        animate={inView ? { scaleY: 1 } : { scaleY: 0 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="origin-top w-full h-12 bg-gradient-to-b from-metaverse-beige/40 via-metaverse-pink/70 to-metaverse-plum/60 opacity-90"
                     />
                 </div>
             )}

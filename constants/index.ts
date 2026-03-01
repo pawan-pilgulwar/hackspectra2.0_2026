@@ -14,13 +14,13 @@ export const EVENT_YEAR = new Date(EVENT_DATE).getFullYear();
 
 // ─── REGISTRATION LINKS ─────────────────────────────────────────────────────
 export const STUDENT_REG_URL =
-  "https://unstop.com/o/l1tyF2T?lb=Z8t5GW62";
+  "https://unstop.com/p/hackspectra-20-2026-mgms-college-of-engineering-nanded-1649253?lb=Z8t5GW62&utm_medium=Share&utm_source=WhatsApp";
 
 // ─── NAVIGATION ─────────────────────────────────────────────────────────────
 export const NAV_LINKS = [
   { label: "About", href: "#about" },
   { label: "Tracks", href: "#tracks" },
-  { label: "Problem Statements", href: "#problems" },
+  { label: "Problem Statements", href: "/problems" },
   { label: "Timeline", href: "#timeline" },
   { label: "Rules", href: "#rules" },
   { label: "Prizes", href: "#prizes" },
@@ -33,7 +33,7 @@ export const STATS = [
   { value: "50", label: "Teams Only" },
   { value: "2–4", label: "Members / Team" },
   { value: "24H", label: "Hackathon" },
-  { value: "₹1,00,000+", label: "Prize Pool" },
+  { value: "₹1 Lakh+", label: "Prize Pool" },
 ];
 
 // ─── WHY JOIN ────────────────────────────────────────────────────────────────
@@ -176,8 +176,8 @@ export const RULES = [
   "Internet access is provided, but no external human help.",
   "Projects will be judged on innovation, execution, and impact.",
   "Submissions must be made before the deadline.",
-  "Registration fee: ₹600 with accomodation, ₹800 without accomodation.",
-  "Problem statements are display on website before the 10 days of event.",
+  "Registration fee: ₹600 without accomodation, ₹800 with accomodation.",
+  "Problem statements will be displayed on website before the 10 days of event.",
   "Violations of rules may lead to immediate disqualification.",
 ];
 
@@ -230,7 +230,7 @@ export const FAQ_ITEMS = [
   {
     question: `Who can participate in ${EVENT_NAME}?`,
     answer:
-      `${EVENT_NAME} is open to all college students with a passion for technology and innovation. You can register as a student (₹800) or expert (₹1000).`,
+      `${EVENT_NAME} is open to all college students with a passion for technology and innovation. Whether you're a coder, designer, or just have a great idea, this hackathon is for you!`,
   },
   {
     question: "What is the team size requirement?",
@@ -240,7 +240,7 @@ export const FAQ_ITEMS = [
   {
     question: "Do we need to have a project idea before registering?",
     answer:
-      "No! Problem statements will be allocated at the inauguration ceremony on the day of the event. Come with domain knowledge and creativity.",
+      "No! Problem statements will be provided before 1days of the event, and you can selecct one that interests you. You can also brainstorm and come up with your own innovative idea during the hackathon.",
   },
   {
     question: "What should we bring to the hackathon?",
