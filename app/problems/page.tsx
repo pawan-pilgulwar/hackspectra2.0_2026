@@ -65,27 +65,27 @@ export default function ProblemsPage() {
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
 
-  const fetchProblems = async () => {
-    try {
-      const response = await fetch("/api/problems/list", {
-        credentials: "include",
-      });
-      const data = await response.json();
-
-      if (data.success && data.problems) {
-        setProblems(data.problems);
-      } else {
-        showToast("Failed to load problems", "error");
-      }
-    } catch (error) {
-      console.error("Failed to fetch problems:", error);
-      showToast("Network error. Please refresh the page.", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const checkAuth = useCallback(async () => {
+    const fetchProblems = async () => {
+      try {
+        const response = await fetch("/api/problems/list", {
+          credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data.success && data.problems) {
+          setProblems(data.problems);
+        } else {
+          showToast("Failed to load problems", "error");
+        }
+      } catch (error) {
+        console.error("Failed to fetch problems:", error);
+        showToast("Network error. Please refresh the page.", "error");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include", // Include cookies
@@ -104,7 +104,7 @@ export default function ProblemsPage() {
       console.error("Auth check failed:", error);
       router.push("/auth");
     }
-  }, [fetchProblems,router]);
+  }, [router]);
 
   // FIX ISSUE 2: Check JWT authentication on mount
   useEffect(() => {

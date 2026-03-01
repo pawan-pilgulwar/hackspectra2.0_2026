@@ -1,8 +1,14 @@
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET || "hackspectra-secret-key-change-in-production";
-const JWT_EXPIRES_IN = "1d"; // 1 days
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = "7d"; // 7 days
+
+// Validate JWT_SECRET exists
+if (!JWT_SECRET) {
+  console.error("CRITICAL: JWT_SECRET is not defined in environment variables!");
+  throw new Error("JWT_SECRET must be defined in environment variables");
+}
 
 export interface JWTPayload {
   teamId: string;
@@ -13,15 +19,29 @@ export interface JWTPayload {
  * Generate JWT token
  */
 export function generateToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured");
+  }
+  
+  try {
+    return jwt.sign(payload, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
+    });
+  } catch (error) {
+    console.error("JWT generation error:", error);
+    throw new Error("Failed to generate authentication token");
+  }
 }
 
 /**
  * Verify JWT token
  */
 export function verifyToken(token: string): JWTPayload | null {
+  if (!JWT_SECRET) {
+    console.error("JWT_SECRET is not configured");
+    return null;
+  }
+  
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     return decoded;
@@ -39,7 +59,7 @@ export function setAuthCookie(response: NextResponse, token: string): NextRespon
   
   response.cookies.set("hackspectra_auth", token, {
     httpOnly: true,
-    secure: isProduction,
+    secure: isProduction, // HTTPS only in production
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     path: "/",

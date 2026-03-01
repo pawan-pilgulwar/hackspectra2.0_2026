@@ -6,6 +6,8 @@ import { requireAuth } from "@/lib/jwt";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
+// Force Node.js runtime (required for Mongoose and jsonwebtoken)
+export const runtime = 'nodejs';
 
 /**
  * GET /api/auth/me

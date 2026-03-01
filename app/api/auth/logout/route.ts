@@ -3,6 +3,8 @@ import { clearAuthCookie } from "@/lib/jwt";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
+// Force Node.js runtime (required for jsonwebtoken)
+export const runtime = 'nodejs';
 
 /**
  * POST /api/auth/logout

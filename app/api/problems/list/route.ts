@@ -4,6 +4,8 @@ import ProblemStatement from "@/lib/models/ProblemStatement";
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
+// Force Node.js runtime (required for Mongoose)
+export const runtime = 'nodejs';
 
 /**
  * GET /api/problems/list

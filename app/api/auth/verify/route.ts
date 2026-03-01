@@ -6,6 +6,8 @@ import { generateToken, setAuthCookie } from "@/lib/jwt";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
+// Force Node.js runtime (required for Mongoose and jsonwebtoken)
+export const runtime = 'nodejs';
 
 /**
  * POST /api/auth/verify
@@ -44,7 +46,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Connect to database
-    await connectDB();
+    try {
+      await connectDB();
+    } catch (dbError) {
+      console.error("Database connection failed:", dbError);
+      return NextResponse.json(
+        { success: false, message: "Database connection error" },
+        { status: 500 }
+      );
+    }
 
     // Find team
     const team = await Team.findOne({
@@ -62,22 +72,36 @@ export async function POST(req: NextRequest) {
     // FIX ISSUE 1: Populate selected problem details if exists
     let selectedProblem = null;
     if (team.selectedProblemId) {
-      const problem = await ProblemStatement.findById(team.selectedProblemId);
-      if (problem) {
-        selectedProblem = {
-          _id: problem._id.toString(),
-          title: problem.title,
-          description: problem.description,
-          track: problem.track,
-        };
+      try {
+        const problem = await ProblemStatement.findById(team.selectedProblemId);
+        if (problem) {
+          selectedProblem = {
+            _id: problem._id.toString(),
+            title: problem.title,
+            description: problem.description,
+            track: problem.track,
+          };
+        }
+      } catch (problemError) {
+        console.error("Error fetching problem details:", problemError);
+        // Continue without problem details
       }
     }
 
     // FIX ISSUE 2: Generate JWT token
-    const token = generateToken({
-      teamId: team.teamId,
-      leaderEmail: team.leaderEmail,
-    });
+    let token;
+    try {
+      token = generateToken({
+        teamId: team.teamId,
+        leaderEmail: team.leaderEmail,
+      });
+    } catch (jwtError) {
+      console.error("JWT generation failed:", jwtError);
+      return NextResponse.json(
+        { success: false, message: "Authentication token generation failed" },
+        { status: 500 }
+      );
+    }
 
     // Create response with team data
     const response = NextResponse.json({

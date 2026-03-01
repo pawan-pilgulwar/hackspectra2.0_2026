@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import ProblemStatement from "@/lib/models/ProblemStatement";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+// Force Node.js runtime (required for Mongoose)
+export const runtime = 'nodejs';
+
 /**
  * POST /api/admin/seed-problems
  * 

@@ -72,7 +72,7 @@ const TeamSchema = new Schema<ITeam>(
 );
 
 // Indexes for faster queries
-TeamSchema.index({ teamId: 1 });
+// Note: teamId already has unique index from schema definition
 TeamSchema.index({ leaderEmail: 1 });
 
 const Team: Model<ITeam> =
