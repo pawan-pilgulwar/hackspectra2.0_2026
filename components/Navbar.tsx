@@ -55,7 +55,11 @@ export default function Navbar() {
                         <div className="hidden lg:flex items-center gap-6">
                             {NAV_LINKS.map((link) => (
                                     !link.href.startsWith("#") ? (
-                                    <Link key={link.href} href={link.href} className="text-slate-300 hover:text-purple-400 font-inter text-sm font-medium transition-colors duration-200 relative group">
+                                    <Link 
+                                        key={link.href} 
+                                        href={link.href === "/problems" ? "/auth" : link.href} 
+                                        className="text-slate-300 hover:text-purple-400 font-inter text-sm font-medium transition-colors duration-200 relative group"
+                                    >
                                         {link.label}
                                     </Link>
                                 ) : (
@@ -107,13 +111,24 @@ export default function Navbar() {
                     >
                         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
                             {NAV_LINKS.map((link) => (
-                                <button
-                                    key={link.href}
-                                    onClick={() => scrollToSection(link.href)}
-                                    className="text-left py-3 px-4 text-slate-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg font-inter text-sm font-medium transition-all"
-                                >
-                                    {link.label}
-                                </button>
+                                !link.href.startsWith("#") ? (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href === "/problems" ? "/auth" : link.href}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="text-left py-3 px-4 text-slate-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg font-inter text-sm font-medium transition-all"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ) : (
+                                    <button
+                                        key={link.href}
+                                        onClick={() => scrollToSection(link.href)}
+                                        className="text-left py-3 px-4 text-slate-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg font-inter text-sm font-medium transition-all"
+                                    >
+                                        {link.label}
+                                    </button>
+                                )
                             ))}
                             <a
                                 href={STUDENT_REG_URL}
