@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { clearAuthCookie } from "@/lib/jwt";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/auth/logout
  * 

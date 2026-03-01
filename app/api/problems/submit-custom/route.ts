@@ -3,6 +3,9 @@ import connectDB from "@/lib/mongodb";
 import Team from "@/lib/models/Team";
 import { requireAuth } from "@/lib/jwt";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/problems/submit-custom
  * 

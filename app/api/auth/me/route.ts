@@ -4,6 +4,9 @@ import Team from "@/lib/models/Team";
 import ProblemStatement from "@/lib/models/ProblemStatement";
 import { requireAuth } from "@/lib/jwt";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/auth/me
  * 

@@ -65,32 +65,6 @@ export default function ProblemsPage() {
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
 
-  const checkAuth = useCallback(async () => {
-    try {
-      const response = await fetch("/api/auth/me", {
-        credentials: "include", // Include cookies
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.team) {
-        setTeamData(data.team);
-        fetchProblems();
-      } else {
-        // Not authenticated, redirect to auth page
-        router.push("/auth");
-      }
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      router.push("/auth");
-    }
-  }, []);
-
-  // FIX ISSUE 2: Check JWT authentication on mount
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
   const fetchProblems = async () => {
     try {
       const response = await fetch("/api/problems/list", {
@@ -110,6 +84,32 @@ export default function ProblemsPage() {
       setIsLoading(false);
     }
   };
+
+  const checkAuth = useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "include", // Include cookies
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.team) {
+        setTeamData(data.team);
+        fetchProblems();
+      } else {
+        // Not authenticated, redirect to auth page
+        router.push("/auth");
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      router.push("/auth");
+    }
+  }, [fetchProblems,router]);
+
+  // FIX ISSUE 2: Check JWT authentication on mount
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const handleSelectProblem = async (problemId: string) => {
     if (!teamData || isSubmitting) return;
