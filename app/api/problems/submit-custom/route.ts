@@ -75,9 +75,8 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Find team using JWT payload
+    // Find team using JWT payload (email only)
     const team = await Team.findOne({ 
-      teamId: payload.teamId,
       leaderEmail: payload.leaderEmail,
     });
     

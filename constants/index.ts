@@ -1,16 +1,44 @@
 // ─── EVENT CONFIGURATION ────────────────────────────────────────────────────
 // Change this single variable to update the countdown timer across the site
-export const EVENT_DATE = "2026-03-28T09:00:00";
+export const EVENT_DATE = "2026-04-11T09:00:00";
 
 export const EVENT_NAME = "HackSpectra 2.0";
 export const EVENT_TAGLINE = "Metaverse: Code Beyond Reality";
 export const EVENT_DURATION = "24-Hour Hackathon";
-export const EVENT_DATE_DISPLAY = "28–29 March 2026";
+export const EVENT_DATE_DISPLAY = "11–12 April 2026";
 export const TEAM_SIZE = "2–4 Members";
 export const TOTAL_TEAMS = "50 Teams Only";
 
 // derived values
 export const EVENT_YEAR = new Date(EVENT_DATE).getFullYear();
+
+// Problem statement selection opens 10 days before event
+export const PROBLEM_SELECTION_DAYS_BEFORE = 10;
+
+// Calculate problem selection start date (10 days before event)
+export const getProblemSelectionStartDate = () => {
+  const eventDate = new Date(EVENT_DATE);
+  const selectionDate = new Date(eventDate);
+  selectionDate.setDate(eventDate.getDate() - PROBLEM_SELECTION_DAYS_BEFORE);
+  return selectionDate;
+};
+
+// Check if problem selection is open
+export const isProblemSelectionOpen = () => {
+  const now = new Date();
+  const selectionStart = getProblemSelectionStartDate();
+  const eventDate = new Date(EVENT_DATE);
+  
+  // Open from 10 days before until event starts
+  return now >= selectionStart && now < eventDate;
+};
+
+// Check if event has started or passed
+export const hasEventStarted = () => {
+  const now = new Date();
+  const eventDate = new Date(EVENT_DATE);
+  return now >= eventDate;
+};
 
 // ─── REGISTRATION LINKS ─────────────────────────────────────────────────────
 export const STUDENT_REG_URL =
@@ -125,42 +153,48 @@ export const TIMELINE = [
   },
   {
     step: "02",
-    title: "Inauguration",
-    description: "Opening ceremony and problem statement allocation to all registered teams.",
-    icon: "🎤",
+    title: "Problem Statement Selection",
+    description: "Teams select their preferred problem statement from available tracks before the event.",
+    icon: "📋",
   },
   {
     step: "03",
+    title: "Inauguration",
+    description: "Opening ceremony and official kickoff of the 24-hour hackathon.",
+    icon: "🎤",
+  },
+  {
+    step: "04",
     title: "Implementation",
     description: "24-hour coding sprint with dedicated mentor support and technical guidance.",
     icon: "💻",
   },
   {
-    step: "04",
+    step: "05",
     title: "Judging Round 1",
     description: "Initial evaluation of project progress, concept clarity, and approach.",
     icon: "⚖️",
   },
   {
-    step: "05",
+    step: "06",
     title: "Cultural Night",
     description: "Networking, relaxation activities, midnight games & unforgettable memories.",
     icon: "🎭",
   },
   {
-    step: "06",
+    step: "07",
     title: "Judging Round 2",
     description: "In-depth technical implementation review and progress assessment.",
     icon: "🔍",
   },
   {
-    step: "07",
+    step: "08",
     title: "Final Presentation",
     description: "Demo day — present your project to expert judges in round 3.",
     icon: "🚀",
   },
   {
-    step: "08",
+    step: "09",
     title: "Valedictory",
     description: "Results announcement, prize distribution, and closing ceremony.",
     icon: "🏆",

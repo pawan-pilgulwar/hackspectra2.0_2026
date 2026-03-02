@@ -54,18 +54,18 @@ export async function GET(req: NextRequest) {
 
     // Fetch problems
     const problems = await ProblemStatement.find(query)
-      .select("title description track maxTeams selectedCount isActive")
+      .select("title description track maxTeams selectedTeams isActive")
       .sort({ track: 1, title: 1 });
 
-    // Add remaining slots
+    // Add remaining slots (computed from selectedTeams.length)
     const problemsWithSlots = problems.map((p) => ({
       _id: p._id.toString(),
       title: p.title,
       description: p.description,
       track: p.track,
       maxTeams: p.maxTeams,
-      selectedCount: p.selectedCount,
-      remainingSlots: Math.max(0, p.maxTeams - p.selectedCount),
+      selectedCount: p.selectedTeams.length,
+      remainingSlots: Math.max(0, p.maxTeams - p.selectedTeams.length),
       isActive: p.isActive,
     }));
 

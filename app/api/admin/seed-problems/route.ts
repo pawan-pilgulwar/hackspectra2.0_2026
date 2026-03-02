@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       sampleProblems.map((p) =>
         ProblemStatement.create({
           ...p,
-          selectedCount: 0,
+          selectedTeams: [], // Initialize with empty array
           isActive: true,
         })
       )

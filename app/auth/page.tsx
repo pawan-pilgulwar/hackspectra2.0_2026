@@ -8,7 +8,6 @@ import Toast from "@/components/Toast";
 
 export default function AuthPage() {
   const router = useRouter();
-  const [teamId, setTeamId] = useState("");
   const [leaderEmail, setLeaderEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<{
@@ -32,8 +31,8 @@ export default function AuthPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!teamId.trim() || !leaderEmail.trim()) {
-      showToast("Please fill in all fields", "error");
+    if (!leaderEmail.trim()) {
+      showToast("Please enter your email", "error");
       return;
     }
 
@@ -47,7 +46,6 @@ export default function AuthPage() {
         },
         credentials: "include", // Important: Include cookies
         body: JSON.stringify({
-          teamId: teamId.trim(),
           leaderEmail: leaderEmail.trim(),
         }),
       });
@@ -66,7 +64,7 @@ export default function AuthPage() {
         }, 1500);
       } else {
         showToast(
-          data.message || "Invalid Team ID or Leader Email",
+          data.message || "Invalid email. Please check and try again.",
           "error"
         );
         
@@ -122,31 +120,12 @@ export default function AuthPage() {
                 Team Authentication
               </h1>
               <p className="text-slate-400 font-inter text-sm">
-                Enter your Unstop credentials to select problem statements
+                Enter your registered team leader email to access problem selection
               </p>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="teamId"
-                  className="block text-sm font-inter font-medium text-slate-300 mb-2"
-                >
-                  Team ID
-                </label>
-                <input
-                  type="text"
-                  id="teamId"
-                  value={teamId}
-                  onChange={(e) => setTeamId(e.target.value)}
-                  placeholder="Enter your Unstop Team ID"
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-500 font-inter focus:outline-none focus:border-metaverse-pink focus:ring-2 focus:ring-metaverse-pink/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  required
-                />
-              </div>
-
               <div>
                 <label
                   htmlFor="leaderEmail"
@@ -164,6 +143,9 @@ export default function AuthPage() {
                   className="w-full px-4 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-500 font-inter focus:outline-none focus:border-metaverse-pink focus:ring-2 focus:ring-metaverse-pink/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   required
                 />
+                <p className="mt-2 text-xs text-slate-500 font-inter">
+                  Use the email you registered with on Unstop
+                </p>
               </div>
 
               <button
@@ -204,7 +186,7 @@ export default function AuthPage() {
             {/* Footer */}
             <div className="mt-6 pt-6 border-t border-slate-700">
               <p className="text-xs text-slate-500 text-center font-inter">
-                Don&apos;t have a Team ID?{" "}
+                Not registered yet?{" "}
                 <a
                   href="/"
                   className="text-metaverse-pink hover:text-metaverse-beige transition-colors"

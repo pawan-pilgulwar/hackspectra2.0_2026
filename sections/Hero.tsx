@@ -10,6 +10,7 @@ import {
     EVENT_DURATION,
     STUDENT_REG_URL,
     TEAM_SIZE,
+    EVENT_DATE
 } from "@/constants";
 
 const ParticleBackground = dynamic(
@@ -21,6 +22,8 @@ export default function Hero() {
     const scrollTo = (id: string) => {
         document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     };
+
+    const TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
 
     return (
         <section
@@ -97,7 +100,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.55 }}
-                    className="text-slate-400 font-inter text-base sm:text-lg max-w-xs sm:max-w-2xl mx-auto mb-10 leading-relaxed"
+                    className="text-slate-400 font-inter text-base sm:text-lg max-w-xs sm:max-w-2xl mx-auto mb-6 leading-relaxed"
                 >
                     A 24-hour hackathon by{" "}
                     <span className="text-metaverse-pink font-semibold">
@@ -106,12 +109,34 @@ export default function Hero() {
                     . Build, innovate, and compete — where ideas meet the metaverse.
                 </motion.p>
 
+                {/* Important Announcement */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.7, delay: 0.65 }}
+                    className="max-w-xs sm:max-w-3xl mx-auto mb-5"
+                >
+                    {Date.now() < new Date(EVENT_DATE).getTime() - TEN_DAYS && (
+                            <div className="glass rounded-xl px-4 sm:px-6 py-4 border border-metaverse-pink/30 bg-gradient-to-r from-metaverse-pink/5 to-metaverse-plum/5 hover:border-metaverse-pink/50 transition-all duration-300">
+                            <div className="flex items-center justify-center gap-2 sm:gap-3">
+                                <span className="text-xl sm:text-2xl">📢</span>
+                                <p className="text-metaverse-beige font-inter text-sm sm:text-base font-medium text-center leading-relaxed">
+                                    Problem statements will be displayed on the website{" "}
+                                    <span className="text-metaverse-pink font-semibold text-glow-muted">
+                                        before 10 days of the event
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+
                 {/* Countdown Timer */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.7, delay: 0.7 }}
-                    className="flex flex-col items-center gap-4 mb-12"
+                    className="flex flex-col items-center gap-4 mb-10"
                 >
                     <p className="text-xs font-inter text-slate-500 uppercase tracking-widest">
                         Event Starts In
@@ -126,18 +151,34 @@ export default function Hero() {
                     transition={{ duration: 0.7, delay: 0.9 }}
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    <a
-                        href={STUDENT_REG_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
-                        <span className="relative z-10 flex items-center gap-2">
-                            ⚡ Register as Student
-                        </span>
-                    </a>
+                    { Date.now() < new Date(EVENT_DATE).getTime() - TEN_DAYS ? (
+                        <a
+                            href={STUDENT_REG_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
+                            <span className="relative z-10 flex items-center gap-2">
+                                ⚡ Register as Student
+                            </span>
+                        </a>
+                    ) :
+                    (
+                        <a
+                            href={STUDENT_REG_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
+                            <span className="relative z-10 flex items-center gap-2">
+                                🏥 Problem Selection
+                            </span>
+                        </a>
+                    )}
 
                     <button
                         onClick={() => scrollTo("about")}
@@ -149,7 +190,7 @@ export default function Hero() {
             </div>
 
             {/* Scroll indicator */}
-            <motion.div
+            {/* <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 0.8 }}
@@ -163,7 +204,7 @@ export default function Hero() {
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     className="w-px h-10 bg-gradient-to-b from-metaverse-pink to-transparent"
                 />
-            </motion.div>
+            </motion.div> */}
         </section>
     );
 }

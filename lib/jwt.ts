@@ -11,7 +11,6 @@ if (!JWT_SECRET) {
 }
 
 export interface JWTPayload {
-  teamId: string;
   leaderEmail: string;
 }
 

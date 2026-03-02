@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
 
     // Find team
     const team = await Team.findOne({
-      teamId: payload.teamId,
       leaderEmail: payload.leaderEmail,
     });
 
@@ -51,13 +50,20 @@ export async function GET(req: NextRequest) {
 
     // Populate selected problem details if exists
     let selectedProblem = null;
-    if (team.selectedProblemId) {
+    if (team.selectedProblem) {
+      // Use the embedded selectedProblem data
+      selectedProblem = {
+        _id: team.selectedProblem.problemId,
+        title: team.selectedProblem.problemTitle,
+        track: team.selectedProblem.problemTrack,
+      };
+    } else if (team.selectedProblemId) {
+      // Fallback: Fetch from database if only ID exists (backward compatibility)
       const problem = await ProblemStatement.findById(team.selectedProblemId);
       if (problem) {
         selectedProblem = {
           _id: problem._id.toString(),
           title: problem.title,
-          description: problem.description,
           track: problem.track,
         };
       }
@@ -69,7 +75,9 @@ export async function GET(req: NextRequest) {
       team: {
         teamId: team.teamId,
         teamName: team.teamName,
+        leaderName: team.leaderName,
         leaderEmail: team.leaderEmail,
+        teamMembers: team.teamMembers,
         selectedTrack: team.selectedTrack,
         selectedProblemId: team.selectedProblemId,
         selectedProblem: selectedProblem,

@@ -16,6 +16,12 @@ export const runtime = 'nodejs';
  * (For NON-Student Innovation tracks)
  * Requires JWT authentication
  * 
+ * ENFORCES:
+ * 1. Team can only select ONE problem (checked via selectedProblem/customProblemStatement)
+ * 2. Problem team limit strictly enforced (selectedTeams.length < maxTeams)
+ * 3. No duplicate team selections
+ * 4. Atomic updates to prevent race conditions
+ * 
  * Request body:
  * {
  *   "problemId": "string"
@@ -29,7 +35,7 @@ export const runtime = 'nodejs';
  */
 export async function POST(req: NextRequest) {
   try {
-    // FIX ISSUE 2: Verify JWT authentication
+    // Verify JWT authentication
     const payload = requireAuth(req);
     
     if (!payload) {
@@ -61,9 +67,8 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Find team using JWT payload
+    // Find team using JWT payload (email only)
     const team = await Team.findOne({ 
-      teamId: payload.teamId,
       leaderEmail: payload.leaderEmail,
     });
     
@@ -74,16 +79,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if team already selected
-    if (team.selectedProblemId || team.customProblemStatement) {
+    // ═══════════════════════════════════════════════════════════════
+    // CHECK 1: Verify team has NOT already selected any problem
+    // ═══════════════════════════════════════════════════════════════
+    if (team.selectedProblem || team.customProblemStatement) {
       return NextResponse.json(
-        { success: false, message: "Team has already made a selection" },
+        { 
+          success: false, 
+          message: "Team has already made a selection. Each team can only select one problem statement." 
+        },
         { status: 400 }
       );
     }
 
     // Find problem statement
     const problem = await ProblemStatement.findById(problemId);
+    
     if (!problem) {
       return NextResponse.json(
         { success: false, message: "Problem statement not found" },
@@ -98,39 +109,105 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if problem is full
-    if (problem.selectedCount >= problem.maxTeams) {
+    // ═══════════════════════════════════════════════════════════════
+    // CHECK 2: Verify problem has NOT reached team limit
+    // ═══════════════════════════════════════════════════════════════
+    if (problem.selectedTeams.length >= problem.maxTeams) {
       return NextResponse.json(
-        { success: false, message: "This problem statement is full" },
+        { 
+          success: false, 
+          message: `This problem statement is full. Maximum ${problem.maxTeams} teams allowed.` 
+        },
         { status: 400 }
       );
     }
 
-    // Atomic update: increment selectedCount only if not full
+    // Check if this team is already in selectedTeams (duplicate prevention)
+    const alreadySelected = problem.selectedTeams.some(
+      (selectedTeam) => selectedTeam.teamId === team.teamId
+    );
+
+    if (alreadySelected) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: "This team has already selected this problem statement." 
+        },
+        { status: 400 }
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ATOMIC UPDATE: Add team to problem's selectedTeams
+    // ═══════════════════════════════════════════════════════════════
+    // Use $push with $position to add team, but only if:
+    // - selectedTeams array length is still less than maxTeams
+    // - This team is not already in the array
     const updatedProblem = await ProblemStatement.findOneAndUpdate(
       {
         _id: problemId,
-        selectedCount: { $lt: problem.maxTeams },
         isActive: true,
+        // Ensure we haven't exceeded limit (atomic check)
+        $expr: { $lt: [{ $size: "$selectedTeams" }, "$maxTeams"] },
+        // Ensure this team isn't already in the array
+        "selectedTeams.teamId": { $ne: team.teamId },
       },
       {
-        $inc: { selectedCount: 1 },
+        $push: {
+          selectedTeams: {
+            teamId: team.teamId,
+            teamName: team.teamName,
+          },
+        },
       },
-      { new: true }
+      { 
+        new: true,
+        runValidators: true, // Run schema validators
+      }
     );
 
+    // If update failed, problem became full or team was already added
     if (!updatedProblem) {
       return NextResponse.json(
-        { success: false, message: "Problem statement became full. Please select another." },
+        { 
+          success: false, 
+          message: "Problem statement became full or selection conflict occurred. Please try another problem." 
+        },
         { status: 409 }
       );
     }
 
-    // Update team
-    team.selectedTrack = problem.track;
-    team.selectedProblemId = problemId;
-    team.selectedAt = new Date();
-    await team.save();
+    // ═══════════════════════════════════════════════════════════════
+    // UPDATE TEAM: Store selected problem details
+    // ═══════════════════════════════════════════════════════════════
+    try {
+      team.selectedTrack = problem.track;
+      team.selectedProblemId = problemId; // Backward compatibility
+      team.selectedProblem = {
+        problemId: problemId,
+        problemTitle: problem.title,
+        problemTrack: problem.track,
+      };
+      team.selectedAt = new Date();
+      await team.save();
+    } catch (teamUpdateError) {
+      // If team update fails, rollback problem update
+      console.error("Team update failed, rolling back problem update:", teamUpdateError);
+      
+      await ProblemStatement.findByIdAndUpdate(
+        problemId,
+        {
+          $pull: {
+            selectedTeams: { teamId: team.teamId },
+          },
+        }
+      );
+
+      return NextResponse.json(
+        { success: false, message: "Failed to complete selection. Please try again." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -139,6 +216,7 @@ export async function POST(req: NextRequest) {
         track: problem.track,
         problemTitle: problem.title,
         problemDescription: problem.description,
+        remainingSlots: updatedProblem.maxTeams - updatedProblem.selectedTeams.length,
       },
     });
   } catch (error) {

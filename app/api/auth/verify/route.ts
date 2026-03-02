@@ -12,13 +12,12 @@ export const runtime = 'nodejs';
 /**
  * POST /api/auth/verify
  * 
- * Authentication endpoint with JWT
- * Validates team using Unstop Team ID and Leader Email
+ * Authentication endpoint with JWT (Email-Only Authentication)
+ * Validates team using Team Leader Email ONLY
  * Returns JWT in HTTP-only cookie
  * 
  * Request body:
  * {
- *   "teamId": "string",
  *   "leaderEmail": "string"
  * }
  * 
@@ -26,8 +25,8 @@ export const runtime = 'nodejs';
  * {
  *   "success": true,
  *   "team": { 
- *     teamId, teamName, leaderEmail, selectedTrack, 
- *     selectedProblemId, selectedProblem (populated), 
+ *     teamId, teamName, leaderName, leaderEmail, teamMembers,
+ *     selectedTrack, selectedProblemId, selectedProblem (populated), 
  *     customProblemStatement 
  *   }
  * }
@@ -35,12 +34,12 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { teamId, leaderEmail } = body;
+    const { leaderEmail } = body;
 
     // Validation
-    if (!teamId || !leaderEmail) {
+    if (!leaderEmail) {
       return NextResponse.json(
-        { success: false, message: "Team ID and Leader Email are required" },
+        { success: false, message: "Leader Email is required" },
         { status: 400 }
       );
     }
@@ -56,29 +55,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find team
+    // Find team by email only
     const team = await Team.findOne({
-      teamId: teamId.trim(),
       leaderEmail: leaderEmail.trim().toLowerCase(),
     });
 
     if (!team) {
       return NextResponse.json(
-        { success: false, message: "Invalid Team ID or Leader Email" },
+        { success: false, message: "Invalid Leader Email. Please check your email or register first." },
         { status: 401 }
       );
     }
 
     // FIX ISSUE 1: Populate selected problem details if exists
     let selectedProblem = null;
-    if (team.selectedProblemId) {
+    if (team.selectedProblem) {
+      // Use the embedded selectedProblem data
+      selectedProblem = {
+        _id: team.selectedProblem.problemId,
+        title: team.selectedProblem.problemTitle,
+        track: team.selectedProblem.problemTrack,
+      };
+    } else if (team.selectedProblemId) {
+      // Fallback: Fetch from database if only ID exists (backward compatibility)
       try {
         const problem = await ProblemStatement.findById(team.selectedProblemId);
         if (problem) {
           selectedProblem = {
             _id: problem._id.toString(),
             title: problem.title,
-            description: problem.description,
             track: problem.track,
           };
         }
@@ -88,11 +93,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // FIX ISSUE 2: Generate JWT token
+    // FIX ISSUE 2: Generate JWT token (email-only)
     let token;
     try {
       token = generateToken({
-        teamId: team.teamId,
         leaderEmail: team.leaderEmail,
       });
     } catch (jwtError) {
@@ -109,7 +113,9 @@ export async function POST(req: NextRequest) {
       team: {
         teamId: team.teamId,
         teamName: team.teamName,
+        leaderName: team.leaderName,
         leaderEmail: team.leaderEmail,
+        teamMembers: team.teamMembers,
         selectedTrack: team.selectedTrack,
         selectedProblemId: team.selectedProblemId,
         selectedProblem: selectedProblem, // NEW: Full problem details

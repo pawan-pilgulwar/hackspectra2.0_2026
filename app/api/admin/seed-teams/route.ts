@@ -40,27 +40,37 @@ export async function POST(req: NextRequest) {
       {
         teamId: "TEAM001",
         teamName: "Code Warriors",
+        leaderName: "John Doe",
         leaderEmail: "leader1@example.com",
+        teamMembers: ["John Doe", "Jane Smith", "Bob Johnson"],
       },
       {
         teamId: "TEAM002",
         teamName: "Tech Innovators",
+        leaderName: "Alice Brown",
         leaderEmail: "leader2@example.com",
+        teamMembers: ["Alice Brown", "Charlie Davis"],
       },
       {
         teamId: "TEAM003",
         teamName: "Cyber Ninjas",
+        leaderName: "Mike Wilson",
         leaderEmail: "leader3@example.com",
+        teamMembers: ["Mike Wilson", "Sarah Miller", "Tom Anderson", "Lisa Garcia"],
       },
       {
         teamId: "TEAM004",
         teamName: "AI Pioneers",
+        leaderName: "David Martinez",
         leaderEmail: "leader4@example.com",
+        teamMembers: ["David Martinez", "Emma Rodriguez"],
       },
       {
         teamId: "TEAM005",
         teamName: "Data Wizards",
+        leaderName: "Chris Taylor",
         leaderEmail: "leader5@example.com",
+        teamMembers: ["Chris Taylor", "Amy White", "Kevin Lee"],
       },
     ];
 

@@ -1,11 +1,21 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+// Sub-schema for selected problem details
+interface ISelectedProblem {
+  problemId: string;
+  problemTitle: string;
+  problemTrack: string;
+}
+
 export interface ITeam extends Document {
   teamId: string; // from Unstop
   teamName: string;
+  leaderName: string; // Team leader's full name
   leaderEmail: string;
+  teamMembers: string[]; // Array of team member names
   selectedTrack: string | null;
-  selectedProblemId: string | null;
+  selectedProblemId: string | null; // Kept for backward compatibility
+  selectedProblem: ISelectedProblem | null; // NEW: Full problem details
   customProblemStatement: {
     title: string;
     description: string;
@@ -14,6 +24,24 @@ export interface ITeam extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const SelectedProblemSchema = new Schema<ISelectedProblem>(
+  {
+    problemId: {
+      type: String,
+      required: true,
+    },
+    problemTitle: {
+      type: String,
+      required: true,
+    },
+    problemTrack: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false } // Don't create _id for subdocuments
+);
 
 const TeamSchema = new Schema<ITeam>(
   {
@@ -28,11 +56,21 @@ const TeamSchema = new Schema<ITeam>(
       required: true,
       trim: true,
     },
+    leaderName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     leaderEmail: {
       type: String,
       required: true,
       lowercase: true,
       trim: true,
+      unique: true, // Email-only authentication requires unique emails
+    },
+    teamMembers: {
+      type: [String],
+      default: [],
     },
     selectedTrack: {
       type: String,
@@ -54,6 +92,10 @@ const TeamSchema = new Schema<ITeam>(
       type: String,
       default: null,
     },
+    selectedProblem: {
+      type: SelectedProblemSchema,
+      default: null,
+    },
     customProblemStatement: {
       type: {
         title: { type: String, required: true },
@@ -72,8 +114,8 @@ const TeamSchema = new Schema<ITeam>(
 );
 
 // Indexes for faster queries
-// Note: teamId already has unique index from schema definition
-TeamSchema.index({ leaderEmail: 1 });
+// Note: teamId and leaderEmail already have unique indexes from schema definition
+// No additional indexes needed
 
 const Team: Model<ITeam> =
   mongoose.models.Team || mongoose.model<ITeam>("Team", TeamSchema);
