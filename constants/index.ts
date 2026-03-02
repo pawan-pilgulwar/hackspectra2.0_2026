@@ -28,7 +28,7 @@ export const isProblemSelectionOpen = () => {
   const now = new Date();
   const selectionStart = getProblemSelectionStartDate();
   const eventDate = new Date(EVENT_DATE);
-  
+
   // Open from 10 days before until event starts
   return now >= selectionStart && now < eventDate;
 };
@@ -78,68 +78,68 @@ export const WHY_JOIN = [
 
 // ─── TRACKS ─────────────────────────────────────────────────────────────────
 export const TRACKS = [
-  { 
-    icon: "🌾", 
-    title: "Agriculture", 
+  {
+    icon: "🌾",
+    title: "Agriculture",
     description: "Innovative tech solutions for agriculture.",
     color: "from-metaverse-green to-metaverse-beige",
     glow: "shadow-meta-green",
   },
-  { 
-    icon: "🏥", 
-    title: "Healthcare", 
+  {
+    icon: "🏥",
+    title: "Healthcare",
     description: "Smart healthcare & medical innovations.",
     color: "from-metaverse-plum to-metaverse-navy",
     glow: "shadow-meta",
   },
-  { 
-    icon: "🎓", 
-    title: "Education", 
+  {
+    icon: "🎓",
+    title: "Education",
     description: "Next-gen education & learning platforms.",
     color: "from-metaverse-pink to-metaverse-beige",
-    glow: "shadow-meta-pink", 
+    glow: "shadow-meta-pink",
   },
-  { 
-    icon: "🏙️", 
-    title: "Smart City", 
+  {
+    icon: "🏙️",
+    title: "Smart City",
     description: "Technology-driven smart city solutions.",
     color: "from-metaverse-slate to-metaverse-dark-blue",
-    glow: "shadow-meta-slate", 
+    glow: "shadow-meta-slate",
   },
-  { 
-    icon: "🌪️", 
-    title: "Disaster Management", 
+  {
+    icon: "🌪️",
+    title: "Disaster Management",
     description: "Disaster prediction & response systems.",
     color: "from-metaverse-navy to-metaverse-plum",
     glow: "shadow-meta",
   },
-  { 
-    icon: "🔐", 
-    title: "Cybersecurity", 
+  {
+    icon: "🔐",
+    title: "Cybersecurity",
     description: "Security, privacy & cyber defense solutions.",
     color: "from-metaverse-dark-blue to-metaverse-slate",
     glow: "shadow-meta-slate",
   },
-  { 
-    icon: "🚗", 
-    title: "Transportation & Tourism", 
+  {
+    icon: "🚗",
+    title: "Transportation & Tourism",
     description: "Smart mobility & tourism tech.",
     color: "from-metaverse-beige to-metaverse-pink",
-    glow: "shadow-meta-pink", 
+    glow: "shadow-meta-pink",
   },
-  { 
-    icon: "👩‍👧", 
-    title: "Women & Child Development", 
+  {
+    icon: "👩‍👧",
+    title: "Women & Child Development",
     description: "Empowerment-focused innovations.",
     color: "from-metaverse-pink to-metaverse-plum",
-    glow: "shadow-meta-pink", 
+    glow: "shadow-meta-pink",
   },
-  { 
-    icon: "💡", 
-    title: "Student Innovation", 
+  {
+    icon: "💡",
+    title: "Student Innovation",
     description: "Open innovation for creative student ideas.",
     color: "from-metaverse-plum to-metaverse-pink",
-    glow: "shadow-meta", 
+    glow: "shadow-meta",
   },
 ];
 
@@ -331,6 +331,5 @@ export const CONTACT = {
   ],
   socials: {
     instagram: "https://instagram.com/hackspectra_mgm",
-    website: "https://hackspectra.netlify.app",
   },
 };

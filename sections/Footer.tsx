@@ -160,7 +160,6 @@ export default function Footer() {
                         <div className="flex items-center gap-3">
                             {[
                                 { Icon: FiInstagram, href: CONTACT.socials.instagram, label: "Instagram" },
-                                { Icon: FiGlobe, href: CONTACT.socials.website, label: "Website" },
                             ].map(({ Icon, href, label }) => (
                                 <a
                                     key={label}
