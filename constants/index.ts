@@ -48,7 +48,6 @@ export const STUDENT_REG_URL =
 export const NAV_LINKS = [
   { label: "About", href: "#about" },
   { label: "Tracks", href: "#tracks" },
-  { label: "Problem Statements", href: "/problems" },
   { label: "Timeline", href: "#timeline" },
   { label: "Rules", href: "#rules" },
   { label: "Prizes", href: "#prizes" },
