@@ -1,11 +1,11 @@
 // ─── EVENT CONFIGURATION ────────────────────────────────────────────────────
 // Change this single variable to update the countdown timer across the site
-export const EVENT_DATE = "2026-04-11T09:00:00";
+export const EVENT_DATE = "2026-04-4T09:00:00";
 
 export const EVENT_NAME = "HackSpectra 2.0";
 export const EVENT_TAGLINE = "Metaverse: Code Beyond Reality";
 export const EVENT_DURATION = "24-Hour Hackathon";
-export const EVENT_DATE_DISPLAY = "11–12 April 2026";
+export const EVENT_DATE_DISPLAY = "4–5 April 2026";
 export const TEAM_SIZE = "2–4 Members";
 export const TOTAL_TEAMS = "50 Teams Only";
 
