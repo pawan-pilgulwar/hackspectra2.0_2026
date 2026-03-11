@@ -21,7 +21,7 @@ export function generateToken(payload: JWTPayload): string {
   if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not configured");
   }
-  
+
   try {
     return jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
@@ -40,7 +40,7 @@ export function verifyToken(token: string): JWTPayload | null {
     console.error("JWT_SECRET is not configured");
     return null;
   }
-  
+
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     return decoded;
@@ -55,7 +55,7 @@ export function verifyToken(token: string): JWTPayload | null {
  */
 export function setAuthCookie(response: NextResponse, token: string): NextResponse {
   const isProduction = process.env.NODE_ENV === "production";
-  
+
   response.cookies.set("hackspectra_auth", token, {
     httpOnly: true,
     secure: isProduction, // HTTPS only in production
@@ -80,7 +80,7 @@ export function clearAuthCookie(response: NextResponse): NextResponse {
  */
 export function getAuthPayload(req: NextRequest): JWTPayload | null {
   const token = req.cookies.get("hackspectra_auth")?.value;
-  
+
   if (!token) {
     return null;
   }

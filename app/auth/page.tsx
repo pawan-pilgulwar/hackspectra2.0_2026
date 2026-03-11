@@ -55,9 +55,9 @@ export default function AuthPage() {
       if (data.success && data.team) {
         // JWT is now stored in HTTP-only cookie by the server
         // No need to store anything in sessionStorage
-        
+
         showToast("Authentication successful! Redirecting...", "success");
-        
+
         // Redirect to problems page after short delay
         setTimeout(() => {
           router.push("/problems");
@@ -67,7 +67,7 @@ export default function AuthPage() {
           data.message || "Invalid email. Please check and try again.",
           "error"
         );
-        
+
         // Redirect to home after error
         setTimeout(() => {
           router.push("/");
@@ -76,7 +76,7 @@ export default function AuthPage() {
     } catch (error) {
       console.error("Authentication error:", error);
       showToast("Network error. Please try again.", "error");
-      
+
       // Redirect to home after error
       setTimeout(() => {
         router.push("/");
@@ -115,7 +115,7 @@ export default function AuthPage() {
                   🔐
                 </div>
               </motion.div>
-              
+
               <h1 className="font-orbitron font-bold text-2xl sm:text-3xl text-white mb-2">
                 Team Authentication
               </h1>

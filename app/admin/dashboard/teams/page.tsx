@@ -1,0 +1,408 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ScrollReveal from "@/components/ScrollReveal";
+import Toast from "@/components/Toast";
+import {
+    FiPlus,
+    FiSearch,
+    FiFilter,
+    FiMail,
+    FiX,
+    FiUser,
+    FiExternalLink,
+} from "react-icons/fi";
+
+type Team = {
+    _id: string;
+    teamId: string;
+    teamName: string;
+    leaderName: string;
+    leaderEmail: string;
+    teamMembers: string[];
+    selectedProblem: {
+        problemId: string;
+        problemTitle: string;
+        problemTrack: string;
+    } | null;
+    customProblemStatement: {
+        title: string;
+    } | null;
+    createdAt: string;
+};
+
+export default function TeamsManagement() {
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // Form state
+    const [newTeam, setNewTeam] = useState({
+        teamId: "",
+        teamName: "",
+        leaderName: "",
+        leaderEmail: "",
+        members: "",
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [toast, setToast] = useState<{
+        message: string;
+        type: "success" | "error" | "info";
+        isVisible: boolean;
+    }>({
+        message: "",
+        type: "info",
+        isVisible: false,
+    });
+
+    const showToast = (message: string, type: "success" | "error" | "info") => {
+        setToast({ message, type, isVisible: true });
+    };
+
+    const fetchTeams = useCallback(async () => {
+        try {
+            const response = await fetch("/api/admin/teams");
+            const data = await response.json();
+            if (data.success) {
+                setTeams(data.teams);
+            }
+        } catch (error) {
+            console.error("Failed to fetch teams:", error);
+            showToast("Failed to load teams", "error");
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchTeams();
+    }, [fetchTeams]);
+
+    const handleAddTeam = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch("/api/admin/teams", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...newTeam,
+                    teamMembers: newTeam.members.split(",").map(m => m.trim()).filter(m => m !== ""),
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast("Team added successfully!", "success");
+                setIsAddModalOpen(false);
+                setNewTeam({ teamId: "", teamName: "", leaderName: "", leaderEmail: "", members: "" });
+                fetchTeams();
+            } else {
+                showToast(data.message || "Failed to add team", "error");
+            }
+        } catch (error) {
+            showToast("Network error", "error");
+            console.log(error)
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const filteredTeams = teams.filter(team =>
+        team.teamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        team.leaderName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        team.teamId.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return (
+        <div className="space-y-8">
+            <Toast
+                message={toast.message}
+                type={toast.type}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(p => ({ ...p, isVisible: false }))}
+            />
+
+            <ScrollReveal>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h2 className="font-orbitron font-bold text-3xl text-white">Teams Management</h2>
+                        <p className="text-slate-400 font-inter">View and manage all registered hackathon teams.</p>
+                    </div>
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-metaverse-pink text-white font-inter font-bold hover:shadow-glow-pink transition-all"
+                    >
+                        <FiPlus /> Add Team
+                    </button>
+                </div>
+            </ScrollReveal>
+
+            {/* Filters & Search */}
+            <ScrollReveal delay={0.1}>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <input
+                            type="text"
+                            placeholder="Search by team name, ID, or leader..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-800/50 border border-white/5 text-white placeholder-slate-500 focus:outline-none focus:border-metaverse-pink/50 font-inter"
+                        />
+                    </div>
+                    <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-800/50 border border-white/5 text-slate-300 font-inter hover:bg-white/5 transition-all">
+                        <FiFilter /> Filter
+                    </button>
+                </div>
+            </ScrollReveal>
+
+            {/* Teams Table / Cards */}
+            <ScrollReveal delay={0.2}>
+                <div className="glass-dark rounded-2xl border border-white/5 overflow-hidden">
+                    {/* Desktop Table */}
+                    <div className="hidden lg:block overflow-x-auto">
+                        <table className="w-full text-left font-inter">
+                            <thead className="bg-white/5 text-slate-400 text-xs uppercase tracking-widest font-bold">
+                                <tr>
+                                    <th className="px-6 py-4">Team</th>
+                                    <th className="px-6 py-4">Leader</th>
+                                    <th className="px-6 py-4">Members</th>
+                                    <th className="px-6 py-4">Problem Selection</th>
+                                    <th className="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                                            Loading teams...
+                                        </td>
+                                    </tr>
+                                ) : filteredTeams.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                                            No teams found.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredTeams.map((team) => (
+                                        <tr key={team._id} className="hover:bg-white/[0.02] transition-colors group">
+                                            <td className="px-6 py-5">
+                                                <div className="font-bold text-white mb-1">{team.teamName}</div>
+                                                <div className="text-xs text-slate-500 font-mono">{team.teamId}</div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center gap-2 text-slate-300 mb-1">
+                                                    <FiUser className="text-metaverse-pink/50 text-xs" />
+                                                    <span className="font-semibold text-sm">{team.leaderName}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-slate-500 text-xs">
+                                                    <FiMail className="text-xs" />
+                                                    <span>{team.leaderEmail}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex -space-x-2">
+                                                    {[...Array(Math.min(3, team.teamMembers.length))].map((_, i) => (
+                                                        <div key={i} className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[10px] text-slate-400 font-bold">
+                                                            {team.teamMembers[i][0]}
+                                                        </div>
+                                                    ))}
+                                                    {team.teamMembers.length > 3 && (
+                                                        <div className="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-slate-200 font-bold">
+                                                            +{team.teamMembers.length - 3}
+                                                        </div>
+                                                    )}
+                                                    {team.teamMembers.length === 0 && (
+                                                        <span className="text-xs text-slate-600 italic">No members added</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                {team.selectedProblem ? (
+                                                    <div className="inline-flex flex-col">
+                                                        <span className="text-xs font-bold text-green-400 uppercase tracking-tighter mb-1">Selected</span>
+                                                        <span className="text-sm text-slate-300 font-medium line-clamp-1 max-w-[200px]">{team.selectedProblem.problemTitle}</span>
+                                                        <span className="text-[10px] text-slate-500 uppercase">{team.selectedProblem.problemTrack}</span>
+                                                    </div>
+                                                ) : team.customProblemStatement ? (
+                                                    <div className="inline-flex flex-col">
+                                                        <span className="text-xs font-bold text-blue-400 uppercase tracking-tighter mb-1">Custom (SI)</span>
+                                                        <span className="text-sm text-slate-300 font-medium line-clamp-1 max-w-[200px]">{team.customProblemStatement.title}</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-500 text-xs font-bold uppercase">Pending</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-5 text-right">
+                                                <button className="p-2 text-slate-500 hover:text-white transition-colors">
+                                                    <FiExternalLink />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="lg:hidden divide-y divide-white/5">
+                        {isLoading ? (
+                            <div className="px-6 py-12 text-center text-slate-500 font-inter">Loading teams...</div>
+                        ) : filteredTeams.map((team) => (
+                            <div key={team._id} className="p-6 space-y-4">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h4 className="font-bold text-white text-lg">{team.teamName}</h4>
+                                        <span className="text-xs text-slate-500 font-mono">{team.teamId}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        {team.selectedProblem || team.customProblemStatement ? (
+                                            <span className="px-2 py-1 rounded-md bg-green-500/10 text-green-400 text-[10px] font-bold uppercase">Assigned</span>
+                                        ) : (
+                                            <span className="px-2 py-1 rounded-md bg-slate-800 text-slate-500 text-[10px] font-bold uppercase">Pending</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Leader</span>
+                                        <p className="text-sm text-slate-300 font-medium">{team.leaderName}</p>
+                                        <p className="text-xs text-slate-500 break-all">{team.leaderEmail}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Members</span>
+                                        <p className="text-sm text-slate-300">{team.teamMembers.length} members</p>
+                                    </div>
+                                </div>
+
+                                {team.selectedProblem && (
+                                    <div className="p-3 rounded-xl bg-slate-800/50 border border-white/5">
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Assigned Problem</span>
+                                        <p className="text-sm text-slate-200 font-medium">{team.selectedProblem.problemTitle}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </ScrollReveal>
+
+            {/* Add Team Modal */}
+            <AnimatePresence>
+                {isAddModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsAddModalOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-2xl bg-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-2xl font-orbitron font-bold text-white">Add New Team</h3>
+                                    <p className="text-slate-400 text-sm font-inter">Register a team manually into the system.</p>
+                                </div>
+                                <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                                    <FiX className="text-2xl" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddTeam} className="p-8 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Team ID (from Unstop)</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={newTeam.teamId}
+                                            onChange={(e) => setNewTeam({ ...newTeam, teamId: e.target.value })}
+                                            placeholder="e.g. HS-2026-001"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Team Name</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={newTeam.teamName}
+                                            onChange={(e) => setNewTeam({ ...newTeam, teamName: e.target.value })}
+                                            placeholder="Enter team name"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Leader Name</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={newTeam.leaderName}
+                                            onChange={(e) => setNewTeam({ ...newTeam, leaderName: e.target.value })}
+                                            placeholder="Full name"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Leader Email</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={newTeam.leaderEmail}
+                                            onChange={(e) => setNewTeam({ ...newTeam, leaderEmail: e.target.value })}
+                                            placeholder="email@example.com"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Team Members (names, comma separated)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={newTeam.members}
+                                        onChange={(e) => setNewTeam({ ...newTeam, members: e.target.value })}
+                                        placeholder="Member 2, Member 3, Member 4..."
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="pt-4 flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsAddModalOpen(false)}
+                                        className="flex-1 py-4 rounded-xl bg-slate-800 text-slate-300 font-inter font-bold hover:bg-slate-700 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-3 py-4 px-12 rounded-xl bg-metaverse-pink text-white font-inter font-bold hover:shadow-glow-pink transition-all flex items-center justify-center gap-2"
+                                    >
+                                        {isSubmitting ? "Adding..." : "Confirm & Add"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}

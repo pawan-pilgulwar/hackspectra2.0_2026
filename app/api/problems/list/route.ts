@@ -57,17 +57,20 @@ export async function GET(req: NextRequest) {
       .select("title description track maxTeams selectedTeams isActive")
       .sort({ track: 1, title: 1 });
 
-    // Add remaining slots (computed from selectedTeams.length)
-    const problemsWithSlots = problems.map((p) => ({
-      _id: p._id.toString(),
-      title: p.title,
-      description: p.description,
-      track: p.track,
-      maxTeams: p.maxTeams,
-      selectedCount: p.selectedTeams.length,
-      remainingSlots: Math.max(0, p.maxTeams - p.selectedTeams.length),
-      isActive: p.isActive,
-    }));
+    // Filter out problems that are full
+    // Only return problems where selectedTeams.length < maxTeams
+    const problemsWithSlots = problems
+      .filter((p) => p.selectedTeams.length < p.maxTeams)
+      .map((p) => ({
+        _id: p._id.toString(),
+        title: p.title,
+        description: p.description,
+        track: p.track,
+        maxTeams: p.maxTeams,
+        selectedCount: p.selectedTeams.length,
+        remainingSlots: p.maxTeams - p.selectedTeams.length,
+        isActive: p.isActive,
+      }));
 
     return NextResponse.json({
       success: true,

@@ -7,7 +7,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import Toast from "@/components/Toast";
 import { TRACKS } from "@/constants";
 import Link from "next/link";
-import { FiMenu, FiX, FiUser, FiMail, FiUsers } from "react-icons/fi";
+import { FiMenu, FiX, FiUser, FiMail, FiUsers, FiLogOut } from "react-icons/fi";
 
 type TeamData = {
   teamId: string;
@@ -108,6 +108,24 @@ export default function ProblemsPage() {
       router.push("/auth");
     }
   }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.success) {
+        showToast("Logged out successfully", "success");
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      showToast("Failed to logout", "error");
+    }
+  };
 
   useEffect(() => {
     checkAuth();
@@ -256,10 +274,19 @@ export default function ProblemsPage() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-slate-700">
-          <p className="text-xs text-slate-500 font-inter">
-            Team ID: <span className="text-slate-400 font-mono">{teamData?.teamId}</span>
-          </p>
+        <div className="pt-4 border-t border-slate-700 flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-[10px] text-slate-500 font-inter uppercase tracking-wider">Team ID</p>
+            <p className="text-xs text-slate-400 font-mono break-all">{teamData?.teamId}</p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-metaverse-pink/20 to-metaverse-plum/20 border border-metaverse-pink/30 text-white font-inter font-semibold hover:from-metaverse-pink hover:to-metaverse-plum hover:border-transparent transition-all active:scale-95 group shadow-lg hover:shadow-metaverse-pink/20"
+          >
+            <FiLogOut className="text-lg group-hover:-translate-x-1 transition-transform" />
+            <span>Logout Team</span>
+          </button>
         </div>
       </div>
     </div>
@@ -306,7 +333,7 @@ export default function ProblemsPage() {
               onClick={() => setMobileDrawerOpen(false)}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             />
-            
+
             {/* Drawer */}
             <motion.div
               initial={{ x: "100%" }}
@@ -340,7 +367,7 @@ export default function ProblemsPage() {
                 Choose Your Challenge
               </h1>
               <p className="text-slate-400 font-inter text-base max-w-2xl mx-auto">
-                Welcome, <span className="text-metaverse-pink font-semibold">{teamData.teamName}</span>! 
+                Welcome, <span className="text-metaverse-pink font-semibold">{teamData.teamName}</span>!
                 Select one problem statement for your team.
               </p>
             </ScrollReveal>
@@ -423,11 +450,10 @@ export default function ProblemsPage() {
                             selectedTrack === track.title ? null : track.title
                           )
                         }
-                        className={`p-4 rounded-xl glass border transition-all ${
-                          selectedTrack === track.title
-                            ? "border-metaverse-pink bg-metaverse-pink/10 scale-105"
-                            : "border-metaverse-pink/10 hover:border-metaverse-pink/30"
-                        }`}
+                        className={`p-4 rounded-xl glass border transition-all ${selectedTrack === track.title
+                          ? "border-metaverse-pink bg-metaverse-pink/10 scale-105"
+                          : "border-metaverse-pink/10 hover:border-metaverse-pink/30"
+                          }`}
                       >
                         <div className="text-3xl mb-2">{track.icon}</div>
                         <div className="font-inter font-semibold text-xs sm:text-sm text-white">
@@ -501,55 +527,54 @@ export default function ProblemsPage() {
               selectedTrack &&
               selectedTrack !== "Student Innovation" &&
               problemsByTrack[selectedTrack] && (
-                  <div>
-                    <h3 className="font-orbitron font-bold text-2xl text-white text-center mb-8">
-                      {selectedTrack} Problems
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {problemsByTrack[selectedTrack].map((problem) => (
-                        <motion.div
-                          key={problem._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="glass rounded-2xl p-6 border border-metaverse-pink/10 hover:border-metaverse-pink/30 transition-all"
-                        >
-                          <div className="flex items-start justify-between gap-3 mb-4">
-                            <h4 className="font-orbitron font-semibold text-lg text-white flex-1">
-                              {problem.title}
-                            </h4>
-                            <div className="text-right flex-shrink-0">
-                              <div className="text-xs text-slate-400">Slots</div>
-                              <div className="font-orbitron font-bold text-xl text-metaverse-beige">
-                                {problem.remainingSlots}
-                              </div>
+                <div>
+                  <h3 className="font-orbitron font-bold text-2xl text-white text-center mb-8">
+                    {selectedTrack} Problems
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {problemsByTrack[selectedTrack].map((problem) => (
+                      <motion.div
+                        key={problem._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="glass rounded-2xl p-6 border border-metaverse-pink/10 hover:border-metaverse-pink/30 transition-all"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <h4 className="font-orbitron font-semibold text-lg text-white flex-1">
+                            {problem.title}
+                          </h4>
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-xs text-slate-400">Slots</div>
+                            <div className="font-orbitron font-bold text-xl text-metaverse-beige">
+                              {problem.remainingSlots}
                             </div>
                           </div>
+                        </div>
 
-                          <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                            {problem.description}
-                          </p>
+                        <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                          {problem.description}
+                        </p>
 
-                          <button
-                            onClick={() => handleSelectProblem(problem._id)}
-                            disabled={
-                              isSubmitting || problem.remainingSlots === 0
-                            }
-                            className={`w-full px-4 py-2 rounded-lg font-inter font-semibold text-sm transition-all ${
-                              problem.remainingSlots === 0
-                                ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                                : "bg-metaverse-pink text-white hover:scale-105 active:scale-95"
+                        <button
+                          onClick={() => handleSelectProblem(problem._id)}
+                          disabled={
+                            isSubmitting || problem.remainingSlots === 0
+                          }
+                          className={`w-full px-4 py-2 rounded-lg font-inter font-semibold text-sm transition-all ${problem.remainingSlots === 0
+                            ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                            : "bg-metaverse-pink text-white hover:scale-105 active:scale-95"
                             }`}
-                          >
-                            {problem.remainingSlots === 0
-                              ? "Full"
-                              : isSubmitting
+                        >
+                          {problem.remainingSlots === 0
+                            ? "Full"
+                            : isSubmitting
                               ? "Selecting..."
                               : "Select This Problem"}
-                          </button>
-                        </motion.div>
-                      ))}
-                    </div>
+                        </button>
+                      </motion.div>
+                    ))}
                   </div>
+                </div>
               )}
           </div>
         </div>
