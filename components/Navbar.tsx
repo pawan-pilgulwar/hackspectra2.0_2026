@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, STUDENT_REG_URL, isProblemSelectionOpen, hasEventStarted } from "@/constants";
 import { FiMenu, FiX } from "react-icons/fi";
-import { RiSpeedUpFill } from "react-icons/ri";
+import Image from "next/image"
 import Link from "next/link";
 
 export default function Navbar() {
@@ -72,8 +72,14 @@ export default function Navbar() {
                             onClick={() => scrollToSection("#hero")}
                             className="flex items-center gap-2 group"
                         >
-                            <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-neon">
-                                <RiSpeedUpFill className="text-white text-lg" />
+                            <div className="relative rounded-lg overflow-hidden shadow-neon">
+                                <Image
+                                    src="/images/hackSpectraLogo.jpg"
+                                    alt="HackSpectra Logo"
+                                    width={50}
+                                    height={50}
+                                    className="object-contain"
+                                />
                             </div>
                             <span className="font-orbitron font-bold text-lg gradient-text group-hover:text-glow-purple transition-all">
                                 HACK<span className="text-cyan-400">SPECTRA</span>
