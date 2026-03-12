@@ -48,7 +48,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 border border-metaverse-pink/30"
+                    className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-5 border border-metaverse-pink/30"
                 >
                     <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-sm font-inter text-slate-300 tracking-widest uppercase">
@@ -88,11 +88,11 @@ export default function Hero() {
                     transition={{ duration: 0.7, delay: 0.4 }}
                     className="mb-6"
                 >
-                    <div className="meta-line w-32 sm:w-64 mx-auto mb-6" />
+                    <div className="meta-line w-32 sm:w-64 mx-auto mb-3" />
                     <p className="font-orbitron text-lg sm:text-xl md:text-2xl tracking-widest uppercase text-metaverse-pink text-glow-muted">
                         {EVENT_TAGLINE}
                     </p>
-                    <div className="meta-line w-32 sm:w-64 mx-auto mt-6" />
+                    <div className="meta-line w-32 sm:w-64 mx-auto mt-3" />
                 </motion.div>
 
                 {/* Description */}
@@ -117,7 +117,7 @@ export default function Hero() {
                     className="max-w-xs sm:max-w-3xl mx-auto mb-5"
                 >
                     {Date.now() < new Date(EVENT_DATE).getTime() - TEN_DAYS && (
-                            <div className="glass rounded-xl px-4 sm:px-6 py-4 border border-metaverse-pink/30 bg-gradient-to-r from-metaverse-pink/5 to-metaverse-plum/5 hover:border-metaverse-pink/50 transition-all duration-300">
+                        <div className="glass rounded-xl px-4 sm:px-6 py-4 border border-metaverse-pink/30 bg-gradient-to-r from-metaverse-pink/5 to-metaverse-plum/5 hover:border-metaverse-pink/50 transition-all duration-300">
                             <div className="flex items-center justify-center gap-2 sm:gap-3">
                                 <span className="text-xl sm:text-2xl">📢</span>
                                 <p className="text-metaverse-beige font-inter text-sm sm:text-base font-medium text-center leading-relaxed">
@@ -151,7 +151,7 @@ export default function Hero() {
                     transition={{ duration: 0.7, delay: 0.9 }}
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    { Date.now() < new Date(EVENT_DATE).getTime() - TEN_DAYS ? (
+                    {Date.now() < new Date(EVENT_DATE).getTime() - TEN_DAYS ? (
                         <a
                             href={STUDENT_REG_URL}
                             target="_blank"
@@ -165,20 +165,20 @@ export default function Hero() {
                             </span>
                         </a>
                     ) :
-                    (
-                        <a
-                            href={STUDENT_REG_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
-                            <span className="relative z-10 flex items-center gap-2">
-                                🏥 Problem Selection
-                            </span>
-                        </a>
-                    )}
+                        (
+                            <a
+                                href={STUDENT_REG_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
+                                <span className="relative z-10 flex items-center gap-2">
+                                    🏥 Problem Selection
+                                </span>
+                            </a>
+                        )}
 
                     <button
                         onClick={() => scrollTo("about")}

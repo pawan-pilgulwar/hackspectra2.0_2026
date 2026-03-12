@@ -90,9 +90,9 @@ export default function Navbar() {
                         <div className="hidden lg:flex items-center gap-6">
                             {NAV_LINKS.map((link) => (
                                 !link.href.startsWith("#") ? (
-                                    <Link 
-                                        key={link.href} 
-                                        href={link.href === "/problems" ? "/auth" : link.href} 
+                                    <Link
+                                        key={link.href}
+                                        href={link.href === "/problems" ? "/auth" : link.href}
                                         className="text-slate-300 hover:text-purple-400 font-inter text-sm font-medium transition-colors duration-200 relative group"
                                     >
                                         {link.label}
@@ -108,7 +108,7 @@ export default function Navbar() {
                                     </button>
                                 )
                             ))}
-                            
+
                             {/* Time-based button logic */}
                             {showClosed ? (
                                 // Show "Closed" button when event has started
@@ -186,7 +186,7 @@ export default function Navbar() {
                                     </button>
                                 )
                             ))}
-                            
+
                             {/* Time-based button logic for mobile */}
                             {showClosed ? (
                                 <button
