@@ -204,7 +204,7 @@ export const TIMELINE = [
 export const RULES = [
   "Teams can have 2 to 4 members.",
   "Bring your own laptops and chargers.",
-  "Pre-built solutions are allowed as the problem statement is released 10 days before the hackathon, but solutions must be original.",
+  "Pre-built solutions allowed; submissions must be original.",
   "24-hour hackathon with scheduled checkpoints.",
   "Internet access is provided, but no external human help.",
   "Projects will be judged on innovation, execution, and impact.",
