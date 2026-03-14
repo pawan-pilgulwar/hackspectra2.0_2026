@@ -57,7 +57,7 @@ export const NAV_LINKS = [
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
 export const STATS = [
-  { value: "50", label: "Teams Only" },
+  { value: "50+", label: "Teams" },
   { value: "2–4", label: "Members / Team" },
   { value: "24H", label: "Hackathon" },
   { value: "₹1 Lakh+", label: "Prize Pool" },
