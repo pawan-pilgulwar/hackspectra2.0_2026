@@ -7,7 +7,7 @@ export const EVENT_TAGLINE = "Metaverse: Code Beyond Reality";
 export const EVENT_DURATION = "24-Hour Hackathon";
 export const EVENT_DATE_DISPLAY = "4–5 April 2026";
 export const TEAM_SIZE = "2–4 Members";
-export const TOTAL_TEAMS = "50 Teams Only";
+export const TOTAL_TEAMS = "50+ Teams";
 
 // derived values
 export const EVENT_YEAR = new Date(EVENT_DATE).getFullYear();
