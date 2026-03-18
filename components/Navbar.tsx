@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { NAV_LINKS, STUDENT_REG_URL, isProblemSelectionOpen, hasEventStarted } from "@/constants";
+import { NAV_LINKS, STUDENT_REG_URL, isProblemSelectionOpen, hasEventStarted, isRegistrationEnds } from "@/constants";
 import { FiMenu, FiX } from "react-icons/fi";
 import Image from "next/image"
 import Link from "next/link";
@@ -12,6 +12,7 @@ export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [showProblemSelection, setShowProblemSelection] = useState(false);
     const [showClosed, setShowClosed] = useState(false);
+    const [showRegistrationClosed, setShowRegistrationClosed] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -34,6 +35,14 @@ export default function Navbar() {
                 // Before problem selection opens - show "Register" button
                 setShowProblemSelection(false);
                 setShowClosed(false);
+            }
+
+            if (isRegistrationEnds()) {
+                // Registration has ended - show "Registration Closed" button
+                setShowRegistrationClosed(true);
+            } else {
+                // Registration is open - show "Register" button
+                setShowRegistrationClosed(false);
             }
         };
 
@@ -116,7 +125,7 @@ export default function Navbar() {
                                     disabled
                                     className="ml-2 px-5 py-2 rounded-lg bg-red-600/50 text-white/70 font-inter font-semibold text-sm cursor-not-allowed border border-red-500/30"
                                 >
-                                    Selection Closed
+                                    Event Closed
                                 </button>
                             ) : showProblemSelection ? (
                                 // Show "Problem Statement Selection" button 10 days before event
@@ -128,14 +137,23 @@ export default function Navbar() {
                                 </Link>
                             ) : (
                                 // Show "Register Now" button before problem selection opens
-                                <a
-                                    href={STUDENT_REG_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="ml-2 px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-inter font-semibold text-sm hover:shadow-neon hover:scale-105 transition-all duration-200"
-                                >
-                                    Register Now
-                                </a>
+                                showRegistrationClosed ? (
+                                    <button
+                                        disabled
+                                        className="ml-2 px-5 py-2 rounded-lg bg-red-600/50 text-white/70 font-inter font-semibold text-sm cursor-not-allowed border border-red-500/30"
+                                    >
+                                        Registration Closed
+                                    </button>
+                                ) : (
+                                    <a
+                                        href={STUDENT_REG_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="ml-2 px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-inter font-semibold text-sm hover:shadow-neon hover:scale-105 transition-all duration-200"
+                                    >
+                                        Register Now
+                                    </a>
+                                )
                             )}
                         </div>
 
@@ -204,15 +222,24 @@ export default function Navbar() {
                                     Problem Selection
                                 </Link>
                             ) : (
-                                <a
-                                    href={STUDENT_REG_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="mt-2 py-3 px-4 text-center rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-inter font-semibold text-sm"
-                                >
-                                    Register Now
-                                </a>
+                                showRegistrationClosed ? (
+                                    <button
+                                        disabled
+                                        className="mt-2 py-3 px-4 text-center rounded-lg bg-red-600/50 text-white/70 font-inter font-semibold text-sm cursor-not-allowed border border-red-500/30"
+                                    >
+                                        Registration Closed
+                                    </button>
+                                ) : (
+                                    <a
+                                        href={STUDENT_REG_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="mt-2 py-3 px-4 text-center rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-inter font-semibold text-sm"
+                                    >
+                                        Register Now
+                                    </a>
+                                )
                             )}
                         </div>
                     </motion.div>

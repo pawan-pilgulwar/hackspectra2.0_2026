@@ -10,8 +10,13 @@ import {
     EVENT_DURATION,
     STUDENT_REG_URL,
     TEAM_SIZE,
-    EVENT_DATE
+    EVENT_DATE,
+    isRegistrationEnds,
+    isProblemSelectionOpen,
+    hasEventStarted,
 } from "@/constants";
+import { div } from "framer-motion/client";
+import { useState, useEffect } from "react";
 
 const ParticleBackground = dynamic(
     () => import("@/components/ParticleBackground"),
@@ -151,7 +156,9 @@ export default function Hero() {
                     transition={{ duration: 0.7, delay: 0.9 }}
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    {Date.now() < new Date(EVENT_DATE).getTime() - TEN_DAYS ? (
+                    {hasEventStarted() ? (
+                        <></>
+                    ) : !isRegistrationEnds() ? (
                         <a
                             href={STUDENT_REG_URL}
                             target="_blank"
@@ -164,21 +171,22 @@ export default function Hero() {
                                 ⚡ Register as Student
                             </span>
                         </a>
-                    ) :
-                        (
-                            <a
-                                href={STUDENT_REG_URL}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
-                                <span className="relative z-10 flex items-center gap-2">
-                                    🏥 Problem Selection
-                                </span>
-                            </a>
-                        )}
+                    ) : isProblemSelectionOpen() ? (
+                        <a
+                            href={STUDENT_REG_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 animated-border transition-opacity duration-300" />
+                            <span className="relative z-10 flex items-center gap-2">
+                                🏥 Problem Selection
+                            </span>
+                        </a>
+                    ) : (
+                        <></>
+                    )}
 
                     <button
                         onClick={() => scrollTo("about")}

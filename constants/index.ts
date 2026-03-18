@@ -15,6 +15,9 @@ export const EVENT_YEAR = new Date(EVENT_DATE).getFullYear();
 // Problem statement selection opens 10 days before event
 export const PROBLEM_SELECTION_DAYS_BEFORE = 10;
 
+// Registration End Date
+export const REGISTRATION_END_DATE = "2026-03-18T20:00:00";
+
 // Calculate problem selection start date (10 days before event)
 export const getProblemSelectionStartDate = () => {
   const eventDate = new Date(EVENT_DATE);
@@ -38,6 +41,13 @@ export const hasEventStarted = () => {
   const now = new Date();
   const eventDate = new Date(EVENT_DATE);
   return now >= eventDate;
+};
+
+// Cgeck if Registration Ends
+export const isRegistrationEnds = () => {
+  const now = new Date();
+  const registrationEndDate = new Date(REGISTRATION_END_DATE);
+  return now >= registrationEndDate;
 };
 
 // ─── REGISTRATION LINKS ─────────────────────────────────────────────────────
