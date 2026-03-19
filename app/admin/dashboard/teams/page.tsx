@@ -12,6 +12,8 @@ import {
     FiX,
     FiUser,
     FiExternalLink,
+    FiEdit2,
+    FiTrash2
 } from "react-icons/fi";
 
 type Team = {
@@ -37,6 +39,10 @@ export default function TeamsManagement() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+    const [problems, setProblems] = useState<{ _id: string, title: string, track: string }[]>([]);
 
     // Form state
     const [newTeam, setNewTeam] = useState({
@@ -77,9 +83,81 @@ export default function TeamsManagement() {
         }
     }, []);
 
+    const fetchProblems = useCallback(async () => {
+        try {
+            const response = await fetch("/api/admin/problems");
+            const data = await response.json();
+            if (data.success) {
+                setProblems(data.problems);
+            }
+        } catch (error) {
+            console.error("Failed to fetch problems:", error);
+        }
+    }, []);
+
     useEffect(() => {
         fetchTeams();
-    }, [fetchTeams]);
+        fetchProblems();
+    }, [fetchTeams, fetchProblems]);
+
+    const handleEditTeam = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedTeam) return;
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/admin/teams/${selectedTeam._id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    teamName: selectedTeam.teamName,
+                    leaderName: selectedTeam.leaderName,
+                    leaderEmail: selectedTeam.leaderEmail,
+                    teamMembers: selectedTeam.teamMembers,
+                    selectedProblemId: selectedTeam.selectedProblem?.problemId || null,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast("Team updated successfully! 🎉", "success");
+                setIsEditModalOpen(false);
+                fetchTeams();
+            } else {
+                showToast(data.message || "Failed to update team", "error");
+            }
+        } catch (error) {
+            showToast("Network error", "error");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteTeam = async () => {
+        if (!selectedTeam) return;
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/admin/teams/${selectedTeam._id}`, {
+                method: "DELETE",
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast("Team deleted successfully", "success");
+                setIsDeleteModalOpen(false);
+                fetchTeams();
+            } else {
+                showToast(data.message || "Failed to delete team", "error");
+            }
+        } catch (error) {
+            showToast("Network error", "error");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const handleAddTeam = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -240,9 +318,31 @@ export default function TeamsManagement() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-5 text-right">
-                                                <button className="p-2 text-slate-500 hover:text-white transition-colors">
-                                                    <FiExternalLink />
-                                                </button>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedTeam(team);
+                                                            setIsEditModalOpen(true);
+                                                        }}
+                                                        className="p-2 text-slate-500 hover:text-metaverse-pink transition-colors"
+                                                        title="Edit Team"
+                                                    >
+                                                        <FiEdit2 />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedTeam(team);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
+                                                        className="p-2 text-slate-500 hover:text-red-500 transition-colors"
+                                                        title="Delete Team"
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
+                                                    <button className="p-2 text-slate-500 hover:text-white transition-colors">
+                                                        <FiExternalLink />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -289,6 +389,27 @@ export default function TeamsManagement() {
                                         <p className="text-sm text-slate-200 font-medium">{team.selectedProblem.problemTitle}</p>
                                     </div>
                                 )}
+
+                                <div className="flex items-center gap-3 pt-2">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedTeam(team);
+                                            setIsEditModalOpen(true);
+                                        }}
+                                        className="flex-1 py-2 rounded-lg bg-white/5 border border-white/5 text-slate-300 text-xs font-bold uppercase hover:bg-metaverse-pink/10 hover:text-metaverse-pink transition-all"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedTeam(team);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                        className="flex-1 py-2 rounded-lg bg-white/5 border border-white/5 text-slate-300 text-xs font-bold uppercase hover:bg-red-500/10 hover:text-red-500 transition-all"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -399,6 +520,179 @@ export default function TeamsManagement() {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Edit Team Modal */}
+            <AnimatePresence>
+                {isEditModalOpen && selectedTeam && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsEditModalOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-2xl bg-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-2xl font-orbitron font-bold text-white">Edit Team</h3>
+                                    <p className="text-slate-400 text-sm font-inter">Update team details and problem selection.</p>
+                                </div>
+                                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                                    <FiX className="text-2xl" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleEditTeam} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Team Name</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={selectedTeam.teamName}
+                                            onChange={(e) => setSelectedTeam({ ...selectedTeam, teamName: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Leader Name</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={selectedTeam.leaderName}
+                                            onChange={(e) => setSelectedTeam({ ...selectedTeam, leaderName: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Leader Email</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={selectedTeam.leaderEmail}
+                                            onChange={(e) => setSelectedTeam({ ...selectedTeam, leaderEmail: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Selected Problem</label>
+                                        <select
+                                            value={selectedTeam.selectedProblem?.problemId || ""}
+                                            onChange={(e) => {
+                                                const pId = e.target.value;
+                                                if (pId === "") {
+                                                    setSelectedTeam({ ...selectedTeam, selectedProblem: null });
+                                                } else {
+                                                    const p = problems.find(prob => prob._id === pId);
+                                                    if (p) {
+                                                        setSelectedTeam({
+                                                            ...selectedTeam,
+                                                            selectedProblem: {
+                                                                problemId: p._id,
+                                                                problemTitle: p.title,
+                                                                problemTrack: p.track
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all appearance-none"
+                                        >
+                                            <option value="">None / Pending</option>
+                                            {problems.map(p => (
+                                                <option key={p._id} value={p._id}>{p.title} ({p.track})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Team Members (comma separated)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={selectedTeam.teamMembers.join(", ")}
+                                        onChange={(e) => setSelectedTeam({
+                                            ...selectedTeam,
+                                            teamMembers: e.target.value.split(",").map(m => m.trim()).filter(m => m !== "")
+                                        })}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all resize-none font-inter"
+                                    ></textarea>
+                                </div>
+
+                                <div className="pt-4 flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditModalOpen(false)}
+                                        className="flex-1 py-4 rounded-xl bg-slate-800 text-slate-300 font-orbitron font-bold text-sm tracking-wider uppercase hover:bg-slate-700 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-[2] py-4 px-12 rounded-xl bg-gradient-to-r from-metaverse-pink to-metaverse-plum text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:shadow-glow-pink transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? "Updating..." : "Save Changes"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {isDeleteModalOpen && selectedTeam && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-red-500/20 shadow-2xl p-8 text-center"
+                        >
+                            <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 text-3xl mx-auto mb-6">
+                                <FiTrash2 />
+                            </div>
+                            <h3 className="text-2xl font-orbitron font-bold text-white mb-2">Delete Team?</h3>
+                            <p className="text-slate-400 font-inter mb-8">
+                                Are you sure you want to delete <span className="text-white font-bold">{selectedTeam.teamName}</span>? This action cannot be undone and will free up any selected problem slots.
+                            </p>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleDeleteTeam}
+                                    disabled={isSubmitting}
+                                    className="w-full py-4 rounded-xl bg-red-500 text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:bg-red-600 transition-all disabled:opacity-50"
+                                >
+                                    {isSubmitting ? "Deleting..." : "Yes, Delete Team"}
+                                </button>
+                                <button
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="w-full py-4 rounded-xl bg-slate-800 text-slate-300 font-orbitron font-bold text-sm tracking-wider uppercase hover:bg-slate-700 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}

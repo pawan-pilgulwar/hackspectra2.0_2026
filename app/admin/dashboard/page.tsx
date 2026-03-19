@@ -8,13 +8,14 @@ import {
     FiUsers,
     FiFileText,
     FiCheckCircle,
-    FiClock,
     FiTrendingUp,
     FiActivity,
     FiSettings,
     FiPlus,
-    FiX
+    FiX,
+    FiDownload
 } from "react-icons/fi";
+import * as XLSX from "xlsx";
 
 type DashboardStats = {
     totalTeams: number;
@@ -24,13 +25,31 @@ type DashboardStats = {
 };
 
 type Team = {
-    selectedProblem: unknown;
-    customProblemStatement: unknown;
+    _id: string;
+    teamId: string;
+    teamName: string;
+    leaderName: string;
+    leaderEmail: string;
+    teamMembers: string[];
+    selectedProblemId?: string;
+    selectedProblem?: {
+        problemId: string;
+        problemTitle: string;
+        track: string;
+    };
+    customProblemStatement?: {
+        title: string;
+        description: string;
+    };
 };
 
 type Problem = {
+    _id: string;
+    title: string;
+    track: string;
     maxTeams: number;
-    selectedTeams: unknown[];
+    selectedTeams: string[];
+    isActive: boolean;
 };
 
 export default function AdminDashboardOverview() {
@@ -46,6 +65,7 @@ export default function AdminDashboardOverview() {
     // Modal states
     const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
     const [isAddProblemModalOpen, setIsAddProblemModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     // Form states
     const [newTeam, setNewTeam] = useState({
@@ -121,6 +141,64 @@ export default function AdminDashboardOverview() {
     useEffect(() => {
         fetchDashboardData();
     }, [fetchDashboardData]);
+
+    const handleExportTeams = async () => {
+        setIsSubmitting(true);
+        try {
+            const res = await fetch("/api/admin/teams");
+            const data = await res.json();
+            if (data.success) {
+                const exportData = data.teams.map((t: Team) => ({
+                    "Team Name": t.teamName,
+                    "Leader Name": t.leaderName,
+                    "Leader Email": t.leaderEmail,
+                    "Team Members": t.teamMembers.join(", "),
+                    "Selected Problem": t.selectedProblem?.problemTitle || (t.customProblemStatement?.title ? `Custom: ${t.customProblemStatement.title}` : "None"),
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(exportData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Teams");
+                XLSX.writeFile(workbook, `HackSpectra_Teams_${new Date().toISOString().split('T')[0]}.xlsx`);
+                showToast("Teams data exported! 📊", "success");
+                setIsExportModalOpen(false);
+            }
+        } catch (error) {
+            console.error("Export teams error:", error);
+            showToast("Failed to export teams data", "error");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleExportProblems = async () => {
+        setIsSubmitting(true);
+        try {
+            const res = await fetch("/api/admin/problems");
+            const data = await res.json();
+            if (data.success) {
+                const exportData = data.problems.map((p: Problem) => ({
+                    "Problem Title": p.title,
+                    "Track": p.track,
+                    "Max Teams": p.maxTeams,
+                    "Selected Team Count": p.selectedTeams.length,
+                    "Remaining Slots": Math.max(0, p.maxTeams - p.selectedTeams.length),
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(exportData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Problem Statements");
+                XLSX.writeFile(workbook, `HackSpectra_Problems_${new Date().toISOString().split('T')[0]}.xlsx`);
+                showToast("Problem statements exported! 📊", "success");
+                setIsExportModalOpen(false);
+            }
+        } catch (error) {
+            console.error("Export problems error:", error);
+            showToast("Failed to export problems data", "error");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const handleAddTeam = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -293,8 +371,11 @@ export default function AdminDashboardOverview() {
                                 <FiFileText className="mb-2 text-xl group-hover:scale-110 transition-transform" />
                                 Add Problem
                             </button>
-                            <button className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-metaverse-pink/10 hover:border-metaverse-pink/30 hover:text-metaverse-pink text-slate-400 font-inter font-semibold transition-all text-left">
-                                <FiClock className="mb-2 text-xl" />
+                            <button
+                                onClick={() => setIsExportModalOpen(true)}
+                                className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-metaverse-pink/10 hover:border-metaverse-pink/30 hover:text-metaverse-pink text-slate-400 font-inter font-semibold transition-all text-left group"
+                            >
+                                <FiDownload className="mb-2 text-xl group-hover:scale-110 transition-transform" />
                                 Export Data
                             </button>
                             <button className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-metaverse-pink/10 hover:border-metaverse-pink/30 hover:text-metaverse-pink text-slate-400 font-inter font-semibold transition-all text-left">
@@ -553,6 +634,75 @@ export default function AdminDashboardOverview() {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {isExportModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsExportModalOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-2xl font-orbitron font-bold text-white">Export Data</h3>
+                                    <p className="text-slate-400 text-sm font-inter">Choose data to download as Excel.</p>
+                                </div>
+                                <button onClick={() => setIsExportModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                                    <FiX className="text-2xl" />
+                                </button>
+                            </div>
+
+                            <div className="p-8 space-y-4">
+                                <button
+                                    onClick={handleExportTeams}
+                                    disabled={isSubmitting}
+                                    className="w-full p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-metaverse-pink/10 hover:border-metaverse-pink/30 hover:text-metaverse-pink text-slate-400 font-inter font-bold transition-all flex items-center gap-4 group disabled:opacity-50"
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl group-hover:bg-metaverse-pink/20 transition-colors">
+                                        <FiUsers />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="text-white">Teams Data</div>
+                                        <div className="text-xs font-normal text-slate-400">Export all registered teams.</div>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={handleExportProblems}
+                                    disabled={isSubmitting}
+                                    className="w-full p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-metaverse-pink/10 hover:border-metaverse-pink/30 hover:text-metaverse-pink text-slate-400 font-inter font-bold transition-all flex items-center gap-4 group disabled:opacity-50"
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl group-hover:bg-metaverse-pink/20 transition-colors">
+                                        <FiFileText />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="text-white">Problem Statements</div>
+                                        <div className="text-xs font-normal text-slate-400">Export all challenge definitions.</div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div className="p-8 bg-slate-950/50 flex justify-end">
+                                <button
+                                    onClick={() => setIsExportModalOpen(false)}
+                                    className="px-6 py-2 text-sm font-orbitron font-bold text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-widest"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}

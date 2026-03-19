@@ -10,7 +10,9 @@ import {
     FiSearch,
     FiFilter,
     FiX,
-    FiCheckCircle
+    FiCheckCircle,
+    FiEdit2,
+    FiTrash2
 } from "react-icons/fi";
 
 type Problem = {
@@ -28,6 +30,9 @@ export default function ProblemsManagement() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
 
     // Form state
     const [newProblem, setNewProblem] = useState({
@@ -81,6 +86,65 @@ export default function ProblemsManagement() {
     useEffect(() => {
         fetchProblems();
     }, [fetchProblems]);
+
+    const handleEditProblem = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedProblem) return;
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/admin/problems/${selectedProblem._id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: selectedProblem.title,
+                    description: selectedProblem.description,
+                    track: selectedProblem.track,
+                    maxTeams: selectedProblem.maxTeams,
+                    isActive: selectedProblem.isActive,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast("Problem updated successfully! 🚀", "success");
+                setIsEditModalOpen(false);
+                fetchProblems();
+            } else {
+                showToast(data.message || "Failed to update problem", "error");
+            }
+        } catch (error) {
+            showToast("Network error", "error");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteProblem = async () => {
+        if (!selectedProblem) return;
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/admin/problems/${selectedProblem._id}`, {
+                method: "DELETE",
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast("Problem deleted successfully", "success");
+                setIsDeleteModalOpen(false);
+                fetchProblems();
+            } else {
+                showToast(data.message || "Failed to delete problem", "error");
+            }
+        } catch (error) {
+            showToast("Network error", "error");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const handleAddProblem = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -220,9 +284,28 @@ export default function ProblemsManagement() {
                                                     <FiCheckCircle /> {remaining} Slots Left
                                                 </span>
                                             )}
-                                            <button className="text-[10px] font-bold text-slate-500 hover:text-white uppercase transition-colors tracking-widest">
-                                                Edit Logic
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        setSelectedProblem(problem);
+                                                        setIsEditModalOpen(true);
+                                                    }}
+                                                    className="p-2 text-slate-500 hover:text-metaverse-pink transition-colors"
+                                                    title="Edit Problem"
+                                                >
+                                                    <FiEdit2 className="text-sm" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => {
+                                                        setSelectedProblem(problem);
+                                                        setIsDeleteModalOpen(true);
+                                                    }}
+                                                    className="p-2 text-slate-500 hover:text-red-500 transition-colors"
+                                                    title="Delete Problem"
+                                                >
+                                                    <FiTrash2 className="text-sm" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -315,19 +398,175 @@ export default function ProblemsManagement() {
                                     <button
                                         type="button"
                                         onClick={() => setIsAddModalOpen(false)}
-                                        className="flex-1 py-4 rounded-xl bg-slate-800 text-slate-300 font-inter font-bold hover:bg-slate-700 transition-all"
+                                        className="flex-1 py-4 rounded-xl bg-slate-800 text-slate-300 font-inter font-bold hover:bg-slate-700 transition-all font-orbitron"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="flex-3 py-4 px-12 rounded-xl bg-metaverse-pink text-white font-inter font-bold hover:shadow-glow-pink transition-all flex items-center justify-center gap-2"
+                                        className="flex-[2] py-4 px-12 rounded-xl bg-gradient-to-r from-metaverse-pink to-metaverse-plum text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:shadow-glow-pink transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
                                         {isSubmitting ? "Creating..." : "Confirm & Create"}
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Edit Problem Modal */}
+            <AnimatePresence>
+                {isEditModalOpen && selectedProblem && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsEditModalOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-2xl bg-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-2xl font-orbitron font-bold text-white">Edit Problem</h3>
+                                    <p className="text-slate-400 text-sm font-inter">Update problem statement details.</p>
+                                </div>
+                                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                                    <FiX className="text-2xl" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleEditProblem} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Problem Title</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={selectedProblem.title}
+                                        onChange={(e) => setSelectedProblem({ ...selectedProblem, title: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Track</label>
+                                        <select
+                                            value={selectedProblem.track}
+                                            onChange={(e) => setSelectedProblem({ ...selectedProblem, track: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all appearance-none"
+                                        >
+                                            {tracks.map(track => (
+                                                <option key={track} value={track}>{track}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Max Teams</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min={1}
+                                            value={selectedProblem.maxTeams}
+                                            onChange={(e) => setSelectedProblem({ ...selectedProblem, maxTeams: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Description</label>
+                                    <textarea
+                                        rows={4}
+                                        required
+                                        value={selectedProblem.description}
+                                        onChange={(e) => setSelectedProblem({ ...selectedProblem, description: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-white/5 text-white focus:border-metaverse-pink/50 focus:outline-none transition-all resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="flex items-center gap-2 px-1">
+                                    <input 
+                                        type="checkbox" 
+                                        id="isActive"
+                                        checked={selectedProblem.isActive}
+                                        onChange={(e) => setSelectedProblem({ ...selectedProblem, isActive: e.target.checked })}
+                                        className="w-4 h-4 rounded border-white/10 bg-slate-800 text-metaverse-pink focus:ring-metaverse-pink/50"
+                                    />
+                                    <label htmlFor="isActive" className="text-sm text-slate-300 font-inter">Active (Visible to teams)</label>
+                                </div>
+
+                                <div className="pt-4 flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditModalOpen(false)}
+                                        className="flex-1 py-4 rounded-xl bg-slate-800 text-slate-300 font-orbitron font-bold text-sm tracking-wider uppercase hover:bg-slate-700 transition-all font-inter"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-[2] py-4 px-12 rounded-xl bg-gradient-to-r from-metaverse-pink to-metaverse-plum text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:shadow-glow-pink transition-all flex items-center justify-center gap-2 disabled:opacity-50 font-inter"
+                                    >
+                                        {isSubmitting ? "Updating..." : "Save Changes"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {isDeleteModalOpen && selectedProblem && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-red-500/20 shadow-2xl p-8 text-center"
+                        >
+                            <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 text-3xl mx-auto mb-6">
+                                <FiTrash2 />
+                            </div>
+                            <h3 className="text-2xl font-orbitron font-bold text-white mb-2">Delete Problem?</h3>
+                            <p className="text-slate-400 font-inter mb-8">
+                                Are you sure you want to delete <span className="text-white font-bold">{selectedProblem.title}</span>? This will remove it from all teams who have selected it. This action cannot be undone.
+                            </p>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleDeleteProblem}
+                                    disabled={isSubmitting}
+                                    className="w-full py-4 rounded-xl bg-red-500 text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:bg-red-600 transition-all disabled:opacity-50 font-inter"
+                                >
+                                    {isSubmitting ? "Deleting..." : "Yes, Delete Problem"}
+                                </button>
+                                <button
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="w-full py-4 rounded-xl bg-slate-800 text-slate-300 font-orbitron font-bold text-sm tracking-wider uppercase hover:bg-slate-700 transition-all font-inter"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}
