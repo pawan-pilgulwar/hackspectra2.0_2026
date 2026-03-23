@@ -42,13 +42,69 @@ export async function PATCH(
 
     try {
         const body = await req.json();
-        const { teamName, leaderName, leaderEmail, teamMembers, selectedProblemId } = body;
+        const { 
+            teamName, 
+            leaderName, 
+            leaderEmail, 
+            teamMembers, 
+            selectedProblemId,
+            approveCustomProblem,
+            rejectCustomProblem,
+            rejectionMessage
+        } = body;
 
         await connectDB();
 
         const team = await Team.findById(id);
         if (!team) {
             return NextResponse.json({ success: false, message: "Team not found" }, { status: 404 });
+        }
+
+        // Handle Custom Problem Approval
+        if (approveCustomProblem) {
+            if (team.customProblemStatement) {
+                team.customProblemStatement.status = "approved";
+                team.isCustomProblemRejected = false;
+                team.rejectionMessage = null;
+                await team.save();
+                return NextResponse.json({ success: true, message: "Custom problem approved! 🛡️", team });
+            }
+        }
+
+        // Handle Custom Problem Rejection
+        if (rejectCustomProblem) {
+            const oldProblemId = team.selectedProblemId;
+
+            // 1. Full Cleanup of Team Document
+            team.customProblemStatement = null;
+            team.selectedTrack = null;
+            team.selectedProblemId = null;
+            team.selectedProblem = null;
+            team.selectedAt = null;
+            team.isCustomProblemRejected = true;
+            team.rejectionMessage = rejectionMessage || "Your custom problem was not approved. Please select another problem.";
+            
+            // 2. Ensure removal from any ProblemStatement collections
+            if (oldProblemId) {
+                await ProblemStatement.findOneAndUpdate(
+                    { _id: oldProblemId },
+                    { $pull: { selectedTeams: { teamId: team.teamId } } }
+                );
+            }
+
+            // Also search for team in ALL problems just in case of multiple references
+            await ProblemStatement.updateMany(
+                { "selectedTeams.teamId": team.teamId },
+                { $pull: { selectedTeams: { teamId: team.teamId } } }
+            );
+
+            await team.save();
+            
+            return NextResponse.json({
+                success: true,
+                message: "Custom problem rejected and selection cleared. Team can now reselect. 🔴",
+                team
+            });
         }
 
         const oldProblemId = team.selectedProblemId;
@@ -89,6 +145,7 @@ export async function PATCH(
                 team.selectedProblem = {
                     problemId: newProblem._id.toString(),
                     problemTitle: newProblem.title,
+                    problemDescription: newProblem.description,
                     problemTrack: newProblem.track
                 };
             } else {

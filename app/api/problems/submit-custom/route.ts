@@ -100,7 +100,10 @@ export async function POST(req: NextRequest) {
     team.customProblemStatement = {
       title: title.trim(),
       description: description.trim(),
+      status: "pending",
     };
+    team.isCustomProblemRejected = false;
+    team.rejectionMessage = null;
     team.selectedAt = new Date();
     await team.save();
 

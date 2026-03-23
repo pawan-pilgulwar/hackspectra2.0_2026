@@ -55,8 +55,17 @@ export async function GET(req: NextRequest) {
       selectedProblem = {
         _id: team.selectedProblem.problemId,
         title: team.selectedProblem.problemTitle,
+        description: team.selectedProblem.problemDescription || "",
         track: team.selectedProblem.problemTrack,
       };
+
+      // Backwards compatibility: if description is missing, try to fetch it
+      if (!selectedProblem.description) {
+        const problem = await ProblemStatement.findById(team.selectedProblem.problemId);
+        if (problem) {
+          selectedProblem.description = problem.description;
+        }
+      }
     } else if (team.selectedProblemId) {
       // Fallback: Fetch from database if only ID exists (backward compatibility)
       const problem = await ProblemStatement.findById(team.selectedProblemId);
@@ -64,6 +73,7 @@ export async function GET(req: NextRequest) {
         selectedProblem = {
           _id: problem._id.toString(),
           title: problem.title,
+          description: problem.description,
           track: problem.track,
         };
       }
@@ -82,6 +92,8 @@ export async function GET(req: NextRequest) {
         selectedProblemId: team.selectedProblemId,
         selectedProblem: selectedProblem,
         customProblemStatement: team.customProblemStatement,
+        rejectionMessage: team.rejectionMessage,
+        isCustomProblemRejected: team.isCustomProblemRejected,
         selectedAt: team.selectedAt,
       },
     });

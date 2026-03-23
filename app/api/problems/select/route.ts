@@ -186,6 +186,7 @@ export async function POST(req: NextRequest) {
       team.selectedProblem = {
         problemId: problemId,
         problemTitle: problem.title,
+        problemDescription: problem.description,
         problemTrack: problem.track,
       };
       team.selectedAt = new Date();

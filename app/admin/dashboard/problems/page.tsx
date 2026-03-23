@@ -23,16 +23,25 @@ type Problem = {
     maxTeams: number;
     selectedTeams: string[];
     isActive: boolean;
+    teamId?: string;
+    teamName?: string;
+    isCustom?: boolean;
+    selectedAt?: string;
+    status?: "pending" | "approved" | "rejected";
 };
 
 export default function ProblemsManagement() {
     const [problems, setProblems] = useState<Problem[]>([]);
+    const [customProblems, setCustomProblems] = useState<Problem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
+    const [activeTab, setActiveTab] = useState<'predefined' | 'custom'>('predefined');
+    const [expandedProblemId, setExpandedProblemId] = useState<string | null>(null);
 
     // Form state
     const [newProblem, setNewProblem] = useState({
@@ -74,6 +83,9 @@ export default function ProblemsManagement() {
             const data = await response.json();
             if (data.success) {
                 setProblems(data.problems);
+                if (data.customProblems) {
+                    setCustomProblems(data.customProblems);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch problems:", error);
@@ -86,6 +98,37 @@ export default function ProblemsManagement() {
     useEffect(() => {
         fetchProblems();
     }, [fetchProblems]);
+
+    const handleRejectCustomProblem = async () => {
+        if (!selectedProblem || !selectedProblem.isCustom) return;
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/admin/teams/${selectedProblem._id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    rejectCustomProblem: true,
+                    rejectionMessage: "Your custom problem was not approved. Please select another problem."
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast("Custom problem rejected and team notified. 🔴", "success");
+                setIsRejectModalOpen(false);
+                fetchProblems();
+            } else {
+                showToast(data.message || "Failed to reject problem", "error");
+            }
+        } catch (error) {
+            showToast("Network error", "error");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     const handleEditProblem = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -205,115 +248,298 @@ export default function ProblemsManagement() {
 
             {/* Filters & Search */}
             <ScrollReveal delay={0.1}>
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input
-                            type="text"
-                            placeholder="Search by title or track..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-800/50 border border-white/5 text-white placeholder-slate-500 focus:outline-none focus:border-metaverse-pink/50 font-inter"
-                        />
+                <div className="flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <input
+                                type="text"
+                                placeholder={`Search ${activeTab === 'predefined' ? 'predefined' : 'custom'} problems...`}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-800/50 border border-white/5 text-white placeholder-slate-500 focus:outline-none focus:border-metaverse-pink/50 font-inter"
+                            />
+                        </div>
+                        <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-800/50 border border-white/5 text-slate-300 font-inter hover:bg-white/5 transition-all">
+                            <FiFilter /> All Tracks
+                        </button>
                     </div>
-                    <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-800/50 border border-white/5 text-slate-300 font-inter hover:bg-white/5 transition-all">
-                        <FiFilter /> All Tracks
-                    </button>
+
+                    {/* Tab Switcher */}
+                    <div className="flex p-1 bg-slate-800/50 rounded-2xl border border-white/5 w-fit">
+                        <button
+                            onClick={() => {
+                                setActiveTab('predefined');
+                                setExpandedProblemId(null);
+                            }}
+                            className={`px-6 py-2.5 rounded-xl font-orbitron font-bold text-xs sm:text-sm transition-all ${
+                                activeTab === 'predefined'
+                                    ? 'bg-metaverse-pink text-white shadow-[0_0_20px_rgba(255,46,126,0.3)]'
+                                    : 'text-slate-500 hover:text-slate-300'
+                            }`}
+                        >
+                            Predefined Problems
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('custom');
+                                setExpandedProblemId(null);
+                            }}
+                            className={`px-6 py-2.5 rounded-xl font-orbitron font-bold text-xs sm:text-sm transition-all ${
+                                activeTab === 'custom'
+                                    ? 'bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+                                    : 'text-slate-500 hover:text-slate-300'
+                            }`}
+                        >
+                            Student Innovation
+                        </button>
+                    </div>
                 </div>
             </ScrollReveal>
 
-            {/* Problems UI */}
-            <ScrollReveal delay={0.2}>
-                {isLoading ? (
-                    <div className="px-6 py-12 text-center text-slate-500 font-inter">Loading problems...</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredProblems.map((problem) => {
-                            const remaining = Math.max(0, problem.maxTeams - problem.selectedTeams.length);
-                            const progress = (problem.selectedTeams.length / problem.maxTeams) * 100;
+            {/* Predefined Problems UI */}
+            <AnimatePresence mode="wait">
+                {activeTab === 'predefined' && (
+                    <motion.div
+                        key="predefined"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <div className="mb-6 flex items-center gap-4">
+                            <h3 className="font-orbitron font-bold text-xl text-white">Predefined Problems</h3>
+                            <div className="h-px flex-1 bg-white/5"></div>
+                        </div>
+                        {isLoading ? (
+                            <div className="px-6 py-12 text-center text-slate-500 font-inter">Loading problems...</div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                {filteredProblems.map((problem) => {
+                                    const remaining = Math.max(0, problem.maxTeams - problem.selectedTeams.length);
+                                    const progress = (problem.selectedTeams.length / problem.maxTeams) * 100;
+                                    const isExpanded = expandedProblemId === problem._id;
 
-                            return (
-                                <div key={problem._id} className="glass-dark p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all flex flex-col h-full group relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                        <FiFileText className="text-6xl text-metaverse-pink" />
-                                    </div>
+                                    return (
+                                        <div key={problem._id} className="glass-dark p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all flex flex-col h-full group relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                <FiFileText className="text-6xl text-metaverse-pink" />
+                                            </div>
 
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <span className="px-3 py-1 rounded-md bg-metaverse-pink/10 text-metaverse-pink text-[10px] font-bold uppercase tracking-widest border border-metaverse-pink/20">
-                                            {problem.track}
-                                        </span>
-                                        {problem.isActive ? (
-                                            <span className="flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase ml-auto">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                                                Active
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-1 text-[10px] text-slate-500 font-bold uppercase ml-auto">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
-                                                Inactive
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <h3 className="font-orbitron font-bold text-white text-lg mb-3 line-clamp-2 min-h-[3.5rem] group-hover:text-metaverse-pink transition-colors">
-                                        {problem.title}
-                                    </h3>
-
-                                    <p className="text-slate-400 text-sm font-inter line-clamp-3 mb-6 flex-1">
-                                        {problem.description}
-                                    </p>
-
-                                    <div className="space-y-4 pt-4 border-t border-white/5">
-                                        <div className="flex items-center justify-between text-xs font-inter">
-                                            <span className="text-slate-500">Utilization</span>
-                                            <span className="text-white font-bold">{problem.selectedTeams.length} / {problem.maxTeams} Teams</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                            <div
-                                                style={{ width: `${progress}%` }}
-                                                className={`h-full transition-all duration-500 ${progress >= 100 ? 'bg-red-500' : 'bg-metaverse-pink'}`}
-                                            ></div>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            {remaining === 0 ? (
-                                                <span className="flex items-center gap-2 text-red-500 text-xs font-bold uppercase">
-                                                    <FiX /> Problem Full
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <span className="px-3 py-1 rounded-md bg-metaverse-pink/10 text-metaverse-pink text-[10px] font-bold uppercase tracking-widest border border-metaverse-pink/20">
+                                                    {problem.track}
                                                 </span>
-                                            ) : (
-                                                <span className="flex items-center gap-2 text-green-500 text-xs font-bold uppercase">
-                                                    <FiCheckCircle /> {remaining} Slots Left
-                                                </span>
-                                            )}
-                                            <div className="flex items-center gap-2">
-                                                <button 
-                                                    onClick={() => {
-                                                        setSelectedProblem(problem);
-                                                        setIsEditModalOpen(true);
-                                                    }}
-                                                    className="p-2 text-slate-500 hover:text-metaverse-pink transition-colors"
-                                                    title="Edit Problem"
-                                                >
-                                                    <FiEdit2 className="text-sm" />
-                                                </button>
-                                                <button 
-                                                    onClick={() => {
-                                                        setSelectedProblem(problem);
-                                                        setIsDeleteModalOpen(true);
-                                                    }}
-                                                    className="p-2 text-slate-500 hover:text-red-500 transition-colors"
-                                                    title="Delete Problem"
-                                                >
-                                                    <FiTrash2 className="text-sm" />
-                                                </button>
+                                                {problem.isActive ? (
+                                                    <span className="flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase ml-auto">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                                        Active
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-1 text-[10px] text-slate-500 font-bold uppercase ml-auto">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
+                                                        Inactive
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <h3 className="font-orbitron font-bold text-white text-lg mb-3 line-clamp-2 min-h-[3.5rem] group-hover:text-metaverse-pink transition-colors">
+                                                {problem.title}
+                                            </h3>
+
+                                            <div className="flex-1 mb-6 flex flex-col">
+                                                <p className={`text-slate-400 text-sm font-inter leading-relaxed ${isExpanded ? "" : "line-clamp-3"}`}>
+                                                    {problem.description}
+                                                </p>
+                                                {problem.description.length > 120 && (
+                                                    <button
+                                                        onClick={() => setExpandedProblemId(isExpanded ? null : problem._id)}
+                                                        className="text-metaverse-pink text-[10px] font-bold uppercase tracking-widest mt-2 w-fit hover:underline"
+                                                    >
+                                                        {isExpanded ? "Read Less" : "Read More"}
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-4 pt-4 border-t border-white/5">
+                                                <div className="flex items-center justify-between text-xs font-inter">
+                                                    <span className="text-slate-500">Utilization</span>
+                                                    <span className="text-white font-bold">{problem.selectedTeams.length} / {problem.maxTeams} Teams</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                    <div
+                                                        style={{ width: `${progress}%` }}
+                                                        className={`h-full transition-all duration-500 ${progress >= 100 ? 'bg-red-500' : 'bg-metaverse-pink'}`}
+                                                    ></div>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    {remaining === 0 ? (
+                                                        <span className="flex items-center gap-2 text-red-500 text-xs font-bold uppercase">
+                                                            <FiX /> Problem Full
+                                                        </span>
+                                                    ) : (
+                                                        <span className="flex items-center gap-2 text-green-500 text-xs font-bold uppercase">
+                                                            <FiCheckCircle /> {remaining} Slots Left
+                                                        </span>
+                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => {
+                                                                setSelectedProblem(problem);
+                                                                setIsEditModalOpen(true);
+                                                            }}
+                                                            className="p-2 text-slate-500 hover:text-metaverse-pink transition-colors"
+                                                            title="Edit Problem"
+                                                        >
+                                                            <FiEdit2 className="text-sm" />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                setSelectedProblem(problem);
+                                                                setIsDeleteModalOpen(true);
+                                                            }}
+                                                            className="p-2 text-slate-500 hover:text-red-500 transition-colors"
+                                                            title="Delete Problem"
+                                                        >
+                                                            <FiTrash2 className="text-sm" />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </motion.div>
                 )}
-            </ScrollReveal>
+            </AnimatePresence>
+
+            {/* Custom Problems (Student Innovation) UI */}
+            <AnimatePresence mode="wait">
+                {activeTab === 'custom' && (
+                    <motion.div
+                        key="custom"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <div className="mb-6 flex items-center gap-4">
+                            <h3 className="font-orbitron font-bold text-xl text-white">Student Innovation (Custom)</h3>
+                            <div className="h-px flex-1 bg-white/5"></div>
+                            <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase border border-blue-500/20">
+                                {customProblems.length} Submissions
+                            </span>
+                        </div>
+
+                        {customProblems.length === 0 ? (
+                            <div className="glass-dark p-12 rounded-3xl border border-white/5 text-center">
+                                <p className="text-slate-500 font-inter">No custom problem statements submitted yet.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {customProblems.filter(p => 
+                                    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    p.teamName?.toLowerCase().includes(searchQuery.toLowerCase())
+                                ).map((problem) => {
+                                    const isExpanded = expandedProblemId === problem._id;
+                                    return (
+                                        <div key={problem._id} className="glass-dark p-6 rounded-2xl border border-blue-500/10 hover:border-blue-500/30 transition-all flex flex-col h-full group relative overflow-hidden bg-gradient-to-br from-blue-500/[0.02] to-transparent">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <span className="px-3 py-1 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20">
+                                                    {problem.track}
+                                                </span>
+                                                <span className="text-[10px] text-slate-500 font-bold ml-auto uppercase opacity-60">
+                                                    Submitted by
+                                                </span>
+                                            </div>
+
+                                            <div className="mb-4">
+                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-tighter mb-1">Team</h4>
+                                                <p className="text-white font-bold font-orbitron text-sm line-clamp-1">{problem.teamName}</p>
+                                                <p className="text-[10px] text-slate-500 font-mono">{problem.teamId}</p>
+                                            </div>
+
+                                            <h3 className="font-orbitron font-bold text-white text-lg mb-3 line-clamp-2 min-h-[3.5rem] group-hover:text-blue-400 transition-colors">
+                                                {problem.title}
+                                            </h3>
+
+                                            <div className="flex-1 mb-6 flex flex-col">
+                                                <p className={`text-slate-400 text-sm font-inter italic leading-relaxed ${isExpanded ? "" : "line-clamp-4"}`}>
+                                                    &quot;{problem.description}&quot;
+                                                </p>
+                                                {problem.description.length > 150 && (
+                                                    <button
+                                                        onClick={() => setExpandedProblemId(isExpanded ? null : problem._id)}
+                                                        className="text-blue-400 text-[10px] font-bold uppercase tracking-widest mt-2 w-fit hover:underline"
+                                                    >
+                                                        {isExpanded ? "Read Less" : "Read More"}
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-3">
+                                                <span className="text-[10px] text-slate-500 font-inter italic">
+                                                    {problem.selectedAt ? new Date(problem.selectedAt).toLocaleDateString() : 'N/A'}
+                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    {(!problem.status || problem.status === "pending") ? (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => {
+                                                                   const approve = async () => {
+                                                                       setIsSubmitting(true);
+                                                                       try {
+                                                                           const res = await fetch(`/api/admin/teams/${problem._id}`, {
+                                                                               method: "PATCH",
+                                                                               headers: { "Content-Type": "application/json" },
+                                                                               body: JSON.stringify({ approveCustomProblem: true }),
+                                                                           });
+                                                                           const data = await res.json();
+                                                                           if (data.success) {
+                                                                               showToast("Problem Approved! ✅", "success");
+                                                                               fetchProblems();
+                                                                           }
+                                                                       } catch (err) { console.error(err); }
+                                                                       finally { setIsSubmitting(false); }
+                                                                   };
+                                                                   approve();
+                                                                }}
+                                                                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/10 text-green-500 text-[10px] font-bold uppercase border border-green-500/20 hover:bg-green-500 hover:text-white transition-all shadow-lg hover:shadow-green-500/20"
+                                                            >
+                                                                <FiCheckCircle /> Approve
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => {
+                                                                    setSelectedProblem(problem);
+                                                                    setIsRejectModalOpen(true);
+                                                                }}
+                                                                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-[10px] font-bold uppercase border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-lg hover:shadow-red-500/20"
+                                                            >
+                                                                <FiX /> Reject
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <span className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold uppercase border ${
+                                                            problem.status === "approved" 
+                                                            ? "bg-green-500/10 text-green-400 border-green-500/20" 
+                                                            : "bg-red-500/10 text-red-400 border-red-500/20"
+                                                        }`}>
+                                                            {problem.status === "approved" ? <FiCheckCircle /> : <FiX />}
+                                                            {problem.status}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Add Problem Modal */}
             <AnimatePresence>
@@ -521,6 +747,58 @@ export default function ProblemsManagement() {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Reject Custom Problem Modal */}
+            <AnimatePresence>
+                {isRejectModalOpen && selectedProblem && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsRejectModalOpen(false)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        ></motion.div>
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-md bg-slate-900 border border-red-500/20 rounded-2xl p-8 shadow-2xl"
+                        >
+                            <div className="text-center">
+                                <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 text-2xl mx-auto mb-6">
+                                    <FiX />
+                                </div>
+                                <h3 className="font-orbitron font-bold text-xl text-white mb-2">Reject Custom Problem?</h3>
+                                <p className="text-slate-400 text-sm font-inter mb-6">
+                                    This will remove the custom problem statement from <span className="text-white font-bold">{selectedProblem.teamName}</span> and allow them to reselect. A rejection message will be sent to the team.
+                                </p>
+
+                                <div className="glass-dark rounded-xl p-4 border border-white/5 mb-8 text-left">
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Custom Problem Title</p>
+                                    <p className="text-white font-inter text-sm font-semibold">{selectedProblem.title}</p>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setIsRejectModalOpen(false)}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-slate-400 font-orbitron font-bold text-xs uppercase tracking-widest hover:bg-slate-700 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleRejectCustomProblem}
+                                        disabled={isSubmitting}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-red-500 text-white font-orbitron font-bold text-xs uppercase tracking-widest hover:bg-red-600 transition-all disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? "Rejecting..." : "Yes, Reject"}
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     </div>
                 )}

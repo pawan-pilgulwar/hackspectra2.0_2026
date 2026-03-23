@@ -30,7 +30,9 @@ type Team = {
     } | null;
     customProblemStatement: {
         title: string;
+        description: string;
     } | null;
+    selectedTrack: string | null;
     createdAt: string;
 };
 
@@ -301,20 +303,21 @@ export default function TeamsManagement() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-5">
-                                                {team.selectedProblem ? (
-                                                    <div className="inline-flex flex-col">
-                                                        <span className="text-xs font-bold text-green-400 uppercase tracking-tighter mb-1">Selected</span>
-                                                        <span className="text-sm text-slate-300 font-medium line-clamp-1 max-w-[200px]">{team.selectedProblem.problemTitle}</span>
-                                                        <span className="text-[10px] text-slate-500 uppercase">{team.selectedProblem.problemTrack}</span>
-                                                    </div>
-                                                ) : team.customProblemStatement ? (
-                                                    <div className="inline-flex flex-col">
-                                                        <span className="text-xs font-bold text-blue-400 uppercase tracking-tighter mb-1">Custom (SI)</span>
-                                                        <span className="text-sm text-slate-300 font-medium line-clamp-1 max-w-[200px]">{team.customProblemStatement.title}</span>
+                                            <td className="px-6 py-4">
+                                                {team.selectedProblem || team.customProblemStatement ? (
+                                                    <div className="flex flex-col gap-1 max-w-[300px]">
+                                                        <span className="text-[10px] font-bold uppercase tracking-tighter text-metaverse-pink px-2 py-0.5 rounded bg-metaverse-pink/10 w-fit border border-metaverse-pink/20">
+                                                            {team.selectedTrack || team.selectedProblem?.problemTrack || "N/A"}
+                                                        </span>
+                                                        <span className="text-white font-inter text-sm font-semibold leading-snug">
+                                                            {team.selectedProblem?.problemTitle || team.customProblemStatement?.title}
+                                                        </span>
+                                                        {team.customProblemStatement && (
+                                                            <span className="text-[9px] text-blue-400 font-bold uppercase">Custom Submission</span>
+                                                        )}
                                                     </div>
                                                 ) : (
-                                                    <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-500 text-xs font-bold uppercase">Pending</span>
+                                                    <span className="text-slate-600 text-xs italic font-inter">No selection</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-5 text-right">

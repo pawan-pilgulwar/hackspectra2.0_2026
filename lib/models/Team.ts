@@ -4,6 +4,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 interface ISelectedProblem {
   problemId: string;
   problemTitle: string;
+  problemDescription: string;
   problemTrack: string;
 }
 
@@ -19,7 +20,10 @@ export interface ITeam extends Document {
   customProblemStatement: {
     title: string;
     description: string;
+    status?: "pending" | "approved" | "rejected";
   } | null;
+  rejectionMessage: string | null;
+  isCustomProblemRejected: boolean;
   selectedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +36,10 @@ const SelectedProblemSchema = new Schema<ISelectedProblem>(
       required: true,
     },
     problemTitle: {
+      type: String,
+      required: true,
+    },
+    problemDescription: {
       type: String,
       required: true,
     },
@@ -100,8 +108,21 @@ const TeamSchema = new Schema<ITeam>(
       type: {
         title: { type: String, required: true },
         description: { type: String, required: true },
+        status: { 
+          type: String, 
+          enum: ["pending", "approved", "rejected"], 
+          default: "pending" 
+        }
       },
       default: null,
+    },
+    rejectionMessage: {
+      type: String,
+      default: null,
+    },
+    isCustomProblemRejected: {
+      type: Boolean,
+      default: false,
     },
     selectedAt: {
       type: Date,

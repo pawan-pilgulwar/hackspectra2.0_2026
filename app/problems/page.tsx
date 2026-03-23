@@ -26,7 +26,10 @@ type TeamData = {
   customProblemStatement: {
     title: string;
     description: string;
+    status: "pending" | "approved" | "rejected";
   } | null;
+  rejectionMessage: string | null;
+  isCustomProblemRejected: boolean;
   selectedAt: string | null;
 };
 
@@ -51,6 +54,12 @@ export default function ProblemsPage() {
   const [customTitle, setCustomTitle] = useState("");
   const [customDescription, setCustomDescription] = useState("");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  
+  // Confirmation Modal State
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingProblem, setPendingProblem] = useState<Problem | null>(null);
+  const [showCustomConfirmModal, setShowCustomConfirmModal] = useState(false);
+
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -130,6 +139,12 @@ export default function ProblemsPage() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    if (teamData?.rejectionMessage && teamData?.isCustomProblemRejected) {
+      showToast(teamData.rejectionMessage, "error");
+    }
+  }, [teamData]);
 
   const handleSelectProblem = async (problemId: string) => {
     if (!teamData || isSubmitting) return;
@@ -217,7 +232,8 @@ export default function ProblemsPage() {
   }, {} as Record<string, Problem[]>);
 
   const hasAlreadySelected =
-    teamData?.selectedProblemId || teamData?.customProblemStatement;
+    teamData?.selectedProblemId || 
+    (teamData?.customProblemStatement && teamData.customProblemStatement.status !== "rejected");
 
   // Team Information Panel Component
   const TeamInfoPanel = () => (
@@ -373,20 +389,34 @@ export default function ProblemsPage() {
             </ScrollReveal>
 
             {/* Already Selected Banner */}
-            {hasAlreadySelected && (
+            {hasAlreadySelected && teamData && (
               <ScrollReveal>
                 <motion.div
                   initial={{ scale: 0.95 }}
                   animate={{ scale: 1 }}
-                  className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/30"
+                  className={`mb-10 p-6 rounded-2xl border ${
+                    teamData.customProblemStatement?.status === "pending"
+                      ? "bg-gradient-to-r from-blue-500/10 to-indigo-600/10 border-blue-500/30"
+                      : "bg-gradient-to-r from-green-500/10 to-green-600/10 border-green-500/30"
+                  }`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-2xl">
-                      ✓
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                      teamData.customProblemStatement?.status === "pending"
+                        ? "bg-blue-500/20 text-blue-400"
+                        : "bg-green-500/20 text-green-400"
+                    }`}>
+                      {teamData.customProblemStatement?.status === "pending" ? "⏳" : "✓"}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-orbitron font-bold text-lg text-green-400 mb-2">
-                        Selection Locked
+                      <h3 className={`font-orbitron font-bold text-lg mb-2 ${
+                        teamData.customProblemStatement?.status === "pending"
+                          ? "text-blue-400"
+                          : "text-green-400"
+                      }`}>
+                        {teamData.customProblemStatement?.status === "pending" 
+                          ? "Submission Under Review" 
+                          : "Selection Locked"}
                       </h3>
                       {teamData.customProblemStatement ? (
                         <div>
@@ -400,6 +430,11 @@ export default function ProblemsPage() {
                           <p className="text-slate-400 text-sm">
                             {teamData.customProblemStatement.description}
                           </p>
+                          {teamData.customProblemStatement.status === "pending" && (
+                            <p className="mt-4 text-blue-400/80 text-xs italic font-inter">
+                              You&apos;ll be notified of the outcome shortly.
+                            </p>
+                          )}
                         </div>
                       ) : teamData.selectedProblem ? (
                         <div>
@@ -434,34 +469,108 @@ export default function ProblemsPage() {
               </ScrollReveal>
             )}
 
-            {/* Track Selection */}
+            {/* Rejection Banner */}
+            {!hasAlreadySelected && teamData?.isCustomProblemRejected && (
+               <ScrollReveal>
+               <motion.div
+                 initial={{ scale: 0.95 }}
+                 animate={{ scale: 1 }}
+                 className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/30"
+               >
+                 <div className="flex items-start gap-4">
+                   <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl text-red-500">
+                     ✕
+                   </div>
+                   <div className="flex-1">
+                     <h3 className="font-orbitron font-bold text-lg text-red-400 mb-2">
+                       Problem Not Approved
+                     </h3>
+                     <p className="text-slate-300 font-inter mb-4">
+                       {teamData.rejectionMessage || "Your custom problem was not approved. Please select another problem from the predefined list or submit a new custom one."}
+                     </p>
+                     <div className="p-4 rounded-xl bg-black/20 border border-white/5">
+                        <p className="text-slate-500 text-xs uppercase font-bold tracking-widest mb-1 italic">Status:</p>
+                        <p className="text-slate-400 font-bold text-sm">Selection Reset</p>
+                     </div>
+                   </div>
+                 </div>
+               </motion.div>
+             </ScrollReveal>
+            )}
+
+            {/* Track Selection & Problem Navigation */}
             {!hasAlreadySelected && (
               <ScrollReveal>
                 <div className="mb-12">
-                  <h2 className="font-orbitron font-bold text-xl sm:text-2xl text-white text-center mb-6">
-                    Select a Track
-                  </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {TRACKS.map((track) => (
-                      <button
-                        key={track.title}
-                        onClick={() =>
-                          setSelectedTrack(
-                            selectedTrack === track.title ? null : track.title
-                          )
-                        }
-                        className={`p-4 rounded-xl glass border transition-all ${selectedTrack === track.title
-                          ? "border-metaverse-pink bg-metaverse-pink/10 scale-105"
-                          : "border-metaverse-pink/10 hover:border-metaverse-pink/30"
-                          }`}
+                  <AnimatePresence mode="wait">
+                    {!selectedTrack ? (
+                      <motion.div
+                        key="track-grid"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="space-y-6"
                       >
-                        <div className="text-3xl mb-2">{track.icon}</div>
-                        <div className="font-inter font-semibold text-xs sm:text-sm text-white">
-                          {track.title}
+                        <h2 className="font-orbitron font-bold text-xl sm:text-2xl text-white text-center mb-6">
+                          Select a Track
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {TRACKS.map((track) => (
+                            <button
+                              key={track.title}
+                              onClick={() => setSelectedTrack(track.title)}
+                              className="p-4 rounded-xl glass border border-metaverse-pink/10 hover:border-metaverse-pink/30 hover:bg-metaverse-pink/5 transition-all group"
+                            >
+                              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
+                                {track.icon}
+                              </div>
+                              <div className="font-inter font-semibold text-xs sm:text-sm text-white">
+                                {track.title}
+                              </div>
+                            </button>
+                          ))}
                         </div>
-                      </button>
-                    ))}
-                  </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="track-dropdown"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="glass-dark rounded-2xl p-6 border border-metaverse-pink/20 flex flex-col sm:flex-row items-center justify-between gap-6"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="text-4xl">
+                            {TRACKS.find((t) => t.title === selectedTrack)?.icon}
+                          </div>
+                          <div>
+                            <p className="text-xs text-metaverse-beige font-inter font-bold uppercase tracking-widest">
+                              Selected Track
+                            </p>
+                            <h3 className="font-orbitron font-bold text-xl text-white">
+                              {selectedTrack}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2 w-full sm:w-auto">
+                          <label className="text-[10px] text-slate-500 font-bold uppercase ml-1">
+                            Switch Track
+                          </label>
+                          <select
+                            value={selectedTrack}
+                            onChange={(e) => setSelectedTrack(e.target.value)}
+                            className="bg-slate-800 border border-white/10 text-white px-4 py-2.5 rounded-xl font-inter text-sm focus:border-metaverse-pink transition-all outline-none appearance-none cursor-pointer min-w-[200px]"
+                          >
+                            {TRACKS.map((track) => (
+                              <option key={track.title} value={track.title}>
+                                {track.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </ScrollReveal>
             )}
@@ -511,7 +620,17 @@ export default function ProblemsPage() {
                     </div>
 
                     <button
-                      onClick={handleSubmitCustom}
+                      onClick={() => {
+                        if (customTitle.trim().length < 5) {
+                          showToast("Title must be at least 5 characters", "error");
+                          return;
+                        }
+                        if (customDescription.trim().length < 20) {
+                          showToast("Description must be at least 20 characters", "error");
+                          return;
+                        }
+                        setShowCustomConfirmModal(true);
+                      }}
                       disabled={isSubmitting}
                       className="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-metaverse-pink to-metaverse-plum text-white font-inter font-semibold hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
@@ -556,7 +675,10 @@ export default function ProblemsPage() {
                         </p>
 
                         <button
-                          onClick={() => handleSelectProblem(problem._id)}
+                          onClick={() => {
+                            setPendingProblem(problem);
+                            setShowConfirmModal(true);
+                          }}
                           disabled={
                             isSubmitting || problem.remainingSlots === 0
                           }
@@ -566,8 +688,8 @@ export default function ProblemsPage() {
                             }`}
                         >
                           {problem.remainingSlots === 0
-                            ? "Full"
-                            : isSubmitting
+                            ? "Limit Full"
+                            : isSubmitting && pendingProblem?._id === problem._id
                               ? "Selecting..."
                               : "Select This Problem"}
                         </button>
@@ -579,6 +701,143 @@ export default function ProblemsPage() {
           </div>
         </div>
       </div>
+
+      {/* Selection Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && pendingProblem && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowConfirmModal(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-metaverse-pink/30 shadow-2xl p-8 overflow-hidden"
+            >
+              {/* Decorative background glow */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-metaverse-pink/10 rounded-full blur-3xl -z-1" />
+              
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-metaverse-pink/20 flex items-center justify-center text-3xl mx-auto mb-6">
+                  ⚠️
+                </div>
+                <h3 className="font-orbitron font-bold text-2xl text-white mb-2">
+                  Confirm Selection
+                </h3>
+                <p className="text-slate-400 text-sm font-inter mb-6">
+                  Are you sure you want to select this problem? 
+                  <span className="text-metaverse-pink block font-semibold mt-1">
+                    You cannot change it later.
+                  </span>
+                </p>
+
+                <div className="glass-dark rounded-xl p-4 border border-white/5 mb-8 text-left">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Track</p>
+                  <p className="text-white font-inter font-semibold mb-3">{pendingProblem.track}</p>
+                  
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Problem Title</p>
+                  <p className="text-white font-inter font-semibold">{pendingProblem.title}</p>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      handleSelectProblem(pendingProblem._id);
+                      setShowConfirmModal(false);
+                    }}
+                    disabled={isSubmitting}
+                    className="w-full py-4 rounded-xl bg-gradient-to-r from-metaverse-pink to-metaverse-plum text-white font-orbitron font-bold text-sm tracking-widest uppercase hover:shadow-glow-pink transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Processing..." : "Confirm Selection"}
+                  </button>
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    disabled={isSubmitting}
+                    className="w-full py-4 rounded-xl bg-slate-800 text-slate-400 font-orbitron font-bold text-sm tracking-widest uppercase hover:bg-slate-700 hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Selection Confirmation Modal */}
+      <AnimatePresence>
+        {showCustomConfirmModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCustomConfirmModal(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-metaverse-pink/30 shadow-2xl p-8 overflow-hidden"
+            >
+              {/* Decorative background glow */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-metaverse-pink/10 rounded-full blur-3xl -z-1" />
+              
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-metaverse-pink/20 flex items-center justify-center text-3xl mx-auto mb-6">
+                  ⚠️
+                </div>
+                <h3 className="font-orbitron font-bold text-2xl text-white mb-2">
+                  Confirm Submission
+                </h3>
+                <p className="text-slate-400 text-sm font-inter mb-6">
+                  Are you sure you want to submit this problem? 
+                  <span className="text-metaverse-pink block font-semibold mt-1">
+                    You cannot change it later.
+                  </span>
+                </p>
+
+                <div className="glass-dark rounded-xl p-4 border border-white/5 mb-8 text-left">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Custom Problem Title</p>
+                  <p className="text-white font-inter font-semibold mb-3">{customTitle}</p>
+                  
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Description Preview</p>
+                  <p className="text-slate-300 font-inter text-sm line-clamp-3">
+                    {customDescription}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      handleSubmitCustom();
+                      setShowCustomConfirmModal(false);
+                    }}
+                    disabled={isSubmitting}
+                    className="w-full py-4 rounded-xl bg-gradient-to-r from-metaverse-pink to-metaverse-plum text-white font-orbitron font-bold text-sm tracking-widest uppercase hover:shadow-glow-pink transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Processing..." : "Confirm & Submit"}
+                  </button>
+                  <button
+                    onClick={() => setShowCustomConfirmModal(false)}
+                    disabled={isSubmitting}
+                    className="w-full py-4 rounded-xl bg-slate-800 text-slate-400 font-orbitron font-bold text-sm tracking-widest uppercase hover:bg-slate-700 hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </section>
   );
 }
