@@ -23,6 +23,7 @@ export const getProblemSelectionStartDate = () => {
   const eventDate = new Date(EVENT_DATE);
   const selectionDate = new Date(eventDate);
   selectionDate.setDate(eventDate.getDate() - PROBLEM_SELECTION_DAYS_BEFORE);
+  selectionDate.setHours(21, 0, 0, 0); // 9 PM
   return selectionDate;
 };
 
