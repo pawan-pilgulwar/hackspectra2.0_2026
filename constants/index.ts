@@ -143,14 +143,14 @@ export const TRACKS = [
     description: "Empowerment-focused innovations.",
     color: "from-metaverse-pink to-metaverse-plum",
     glow: "shadow-meta-pink",
-  },
-  {
-    icon: "💡",
-    title: "Student Innovation",
-    description: "Open innovation for creative student ideas.",
-    color: "from-metaverse-plum to-metaverse-pink",
-    glow: "shadow-meta",
-  },
+  // },
+  // {
+  //   icon: "💡",
+  //   title: "Student Innovation",
+  //   description: "Open innovation for creative student ideas.",
+  //   color: "from-metaverse-plum to-metaverse-pink",
+  //   glow: "shadow-meta",
+  // },
 ];
 
 // ─── TIMELINE ────────────────────────────────────────────────────────────────
