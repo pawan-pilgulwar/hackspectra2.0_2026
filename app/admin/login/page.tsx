@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
 import Toast from "@/components/Toast";
 
-export default function AdminLoginPage() {
+function LoginContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState<{
@@ -27,6 +28,18 @@ export default function AdminLoginPage() {
     const hideToast = () => {
         setToast((prev) => ({ ...prev, isVisible: false }));
     };
+
+    // Check for session expired error
+    useEffect(() => {
+        const error = searchParams.get("error");
+        if (error === "session_expired") {
+            showToast("Your session has expired or you logged in from another device.", "error");
+            
+            // Clean up the URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, "", newUrl);
+        }
+    }, [searchParams]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -148,5 +161,17 @@ export default function AdminLoginPage() {
                 <div className="absolute bottom-1/4 -right-12 w-64 h-64 bg-metaverse-plum/5 rounded-full blur-[100px]"></div>
             </div>
         </section>
+    );
+}
+
+export default function AdminLoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-metaverse-navy flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-metaverse-pink border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }

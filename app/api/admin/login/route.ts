@@ -31,14 +31,29 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Generate a simple admin-specific JWT
+        // Generate a unique session ID for single active login control
+        const sessionId = crypto.randomUUID();
+
+        // Connect to database to store the active session
+        const connectDB = (await import("@/lib/mongodb")).default;
+        const AdminSession = (await import("@/lib/models/AdminSession")).default;
+        await connectDB();
+
+        // Update or create the admin session record (only one admin session exists)
+        await AdminSession.findOneAndUpdate(
+            {}, 
+            { activeSessionId: sessionId },
+            { upsert: true, new: true }
+        );
+
+        // Generate a simple admin-specific JWT with role and sessionId
         const JWT_SECRET = process.env.JWT_SECRET;
         if (!JWT_SECRET) {
             throw new Error("JWT_SECRET is not configured");
         }
 
         const token = jwt.sign(
-            { role: "admin", admin: true },
+            { role: "admin", admin: true, sessionId },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
@@ -47,11 +62,6 @@ export async function POST(req: NextRequest) {
             success: true,
             message: "Admin login successful",
         });
-
-        // We can reuse setAuthCookie but maybe we want a different cookie name for admin
-        // To keep it simple and follow instructions, I'll use a specific cookie if needed
-        // or just use the same helper if it's flexible enough.
-        // Actually, let's define a specific admin cookie setter here or in jwt.ts.
 
         response.cookies.set("hackspectra_admin_auth", token, {
             httpOnly: true,

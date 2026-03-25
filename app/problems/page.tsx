@@ -54,7 +54,7 @@ export default function ProblemsPage() {
   const [customTitle, setCustomTitle] = useState("");
   const [customDescription, setCustomDescription] = useState("");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  
+
   // Confirmation Modal State
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingProblem, setPendingProblem] = useState<Problem | null>(null);
@@ -232,7 +232,7 @@ export default function ProblemsPage() {
   }, {} as Record<string, Problem[]>);
 
   const hasAlreadySelected =
-    teamData?.selectedProblemId || 
+    teamData?.selectedProblemId ||
     (teamData?.customProblemStatement && teamData.customProblemStatement.status !== "rejected");
 
   // Team Information Panel Component
@@ -394,28 +394,25 @@ export default function ProblemsPage() {
                 <motion.div
                   initial={{ scale: 0.95 }}
                   animate={{ scale: 1 }}
-                  className={`mb-10 p-6 rounded-2xl border ${
-                    teamData.customProblemStatement?.status === "pending"
-                      ? "bg-gradient-to-r from-blue-500/10 to-indigo-600/10 border-blue-500/30"
-                      : "bg-gradient-to-r from-green-500/10 to-green-600/10 border-green-500/30"
-                  }`}
+                  className={`mb-10 p-6 rounded-2xl border ${teamData.customProblemStatement?.status === "pending"
+                    ? "bg-gradient-to-r from-blue-500/10 to-indigo-600/10 border-blue-500/30"
+                    : "bg-gradient-to-r from-green-500/10 to-green-600/10 border-green-500/30"
+                    }`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
-                      teamData.customProblemStatement?.status === "pending"
-                        ? "bg-blue-500/20 text-blue-400"
-                        : "bg-green-500/20 text-green-400"
-                    }`}>
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl ${teamData.customProblemStatement?.status === "pending"
+                      ? "bg-blue-500/20 text-blue-400"
+                      : "bg-green-500/20 text-green-400"
+                      }`}>
                       {teamData.customProblemStatement?.status === "pending" ? "⏳" : "✓"}
                     </div>
                     <div className="flex-1">
-                      <h3 className={`font-orbitron font-bold text-lg mb-2 ${
-                        teamData.customProblemStatement?.status === "pending"
-                          ? "text-blue-400"
-                          : "text-green-400"
-                      }`}>
-                        {teamData.customProblemStatement?.status === "pending" 
-                          ? "Submission Under Review" 
+                      <h3 className={`font-orbitron font-bold text-lg mb-2 ${teamData.customProblemStatement?.status === "pending"
+                        ? "text-blue-400"
+                        : "text-green-400"
+                        }`}>
+                        {teamData.customProblemStatement?.status === "pending"
+                          ? "Submission Under Review"
                           : "Selection Locked"}
                       </h3>
                       {teamData.customProblemStatement ? (
@@ -471,31 +468,31 @@ export default function ProblemsPage() {
 
             {/* Rejection Banner */}
             {!hasAlreadySelected && teamData?.isCustomProblemRejected && (
-               <ScrollReveal>
-               <motion.div
-                 initial={{ scale: 0.95 }}
-                 animate={{ scale: 1 }}
-                 className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/30"
-               >
-                 <div className="flex items-start gap-4">
-                   <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl text-red-500">
-                     ✕
-                   </div>
-                   <div className="flex-1">
-                     <h3 className="font-orbitron font-bold text-lg text-red-400 mb-2">
-                       Problem Not Approved
-                     </h3>
-                     <p className="text-slate-300 font-inter mb-4">
-                       {teamData.rejectionMessage || "Your custom problem was not approved. Please select another problem from the predefined list or submit a new custom one."}
-                     </p>
-                     <div className="p-4 rounded-xl bg-black/20 border border-white/5">
+              <ScrollReveal>
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/30"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl text-red-500">
+                      ✕
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-orbitron font-bold text-lg text-red-400 mb-2">
+                        Problem Not Approved
+                      </h3>
+                      <p className="text-slate-300 font-inter mb-4">
+                        {teamData.rejectionMessage || "Your custom problem was not approved. Please select another problem from the predefined list or submit a new custom one."}
+                      </p>
+                      <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                         <p className="text-slate-500 text-xs uppercase font-bold tracking-widest mb-1 italic">Status:</p>
                         <p className="text-slate-400 font-bold text-sm">Selection Reset</p>
-                     </div>
-                   </div>
-                 </div>
-               </motion.div>
-             </ScrollReveal>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </ScrollReveal>
             )}
 
             {/* Track Selection & Problem Navigation */}
@@ -515,7 +512,7 @@ export default function ProblemsPage() {
                           Select a Track
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {TRACKS.map((track) => (
+                          {TRACKS.filter((track) => track.title !== "Student Innovation").map((track) => (
                             <button
                               key={track.title}
                               onClick={() => setSelectedTrack(track.title)}
@@ -656,9 +653,8 @@ export default function ProblemsPage() {
                         key={problem._id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`glass rounded-2xl p-6 border border-metaverse-pink/10 hover:border-metaverse-pink/30 transition-all ${
-                          problem.remainingSlots === 0 ? "opacity-60 grayscale-[0.4]" : ""
-                        }`}
+                        className={`glass rounded-2xl p-6 border border-metaverse-pink/10 hover:border-metaverse-pink/30 transition-all ${problem.remainingSlots === 0 ? "opacity-60 grayscale-[0.4]" : ""
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-4">
                           <h4 className="font-orbitron font-semibold text-lg text-white flex-1">
@@ -723,7 +719,7 @@ export default function ProblemsPage() {
             >
               {/* Decorative background glow */}
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-metaverse-pink/10 rounded-full blur-3xl -z-1" />
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-metaverse-pink/20 flex items-center justify-center text-3xl mx-auto mb-6">
                   ⚠️
@@ -732,7 +728,7 @@ export default function ProblemsPage() {
                   Confirm Selection
                 </h3>
                 <p className="text-slate-400 text-sm font-inter mb-6">
-                  Are you sure you want to select this problem? 
+                  Are you sure you want to select this problem?
                   <span className="text-metaverse-pink block font-semibold mt-1">
                     You cannot change it later.
                   </span>
@@ -741,7 +737,7 @@ export default function ProblemsPage() {
                 <div className="glass-dark rounded-xl p-4 border border-white/5 mb-8 text-left">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Track</p>
                   <p className="text-white font-inter font-semibold mb-3">{pendingProblem.track}</p>
-                  
+
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Problem Title</p>
                   <p className="text-white font-inter font-semibold">{pendingProblem.title}</p>
                 </div>
@@ -790,7 +786,7 @@ export default function ProblemsPage() {
             >
               {/* Decorative background glow */}
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-metaverse-pink/10 rounded-full blur-3xl -z-1" />
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-metaverse-pink/20 flex items-center justify-center text-3xl mx-auto mb-6">
                   ⚠️
@@ -799,7 +795,7 @@ export default function ProblemsPage() {
                   Confirm Submission
                 </h3>
                 <p className="text-slate-400 text-sm font-inter mb-6">
-                  Are you sure you want to submit this problem? 
+                  Are you sure you want to submit this problem?
                   <span className="text-metaverse-pink block font-semibold mt-1">
                     You cannot change it later.
                   </span>
@@ -808,7 +804,7 @@ export default function ProblemsPage() {
                 <div className="glass-dark rounded-xl p-4 border border-white/5 mb-8 text-left">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Custom Problem Title</p>
                   <p className="text-white font-inter font-semibold mb-3">{customTitle}</p>
-                  
+
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Description Preview</p>
                   <p className="text-slate-300 font-inter text-sm line-clamp-3">
                     {customDescription}

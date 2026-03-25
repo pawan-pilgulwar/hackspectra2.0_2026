@@ -24,14 +24,34 @@ export default function AdminDashboardLayout({
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Check if admin is authenticated
-    // In a real app, this should be done in middleware or server components
-    // But for this junior dev task, we'll add a simple client-side check as well
+    // Check if admin is authenticated and session is still active
     useEffect(() => {
-        // We'll rely on server-side protection for the actual dashboard data
-        // This is just for UI redirection
-        setIsLoading(false);
-    }, []);
+        const checkSession = async () => {
+            try {
+                const response = await fetch("/api/admin/verify");
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (data.code === "SESSION_INVALID") {
+                        router.push("/admin/login?error=session_expired");
+                    } else {
+                        // Other unauthorized errors
+                        router.push("/admin/login");
+                    }
+                }
+            } catch (error) {
+                console.error("Session check error:", error);
+                router.push("/admin/login");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkSession();
+
+        // Optional: Periodically check session (e.g. every 1 minute)
+        const interval = setInterval(checkSession, 60000);
+        return () => clearInterval(interval);
+    }, [router]);
 
     const navItems = [
         { name: "Overview", href: "/admin/dashboard", icon: <FiHome /> },

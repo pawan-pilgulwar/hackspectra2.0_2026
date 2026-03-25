@@ -1,37 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Team from "@/lib/models/Team";
-import jwt from "jsonwebtoken";
+import { verifyAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-/**
- * Helper to verify admin cookie
- */
-async function verifyAdmin(req: NextRequest) {
-    const token = req.cookies.get("hackspectra_admin_auth")?.value;
-    if (!token) return false;
-
-    try {
-        const JWT_SECRET = process.env.JWT_SECRET;
-        if (!JWT_SECRET) return false;
-
-        const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
-        return !!(decoded && decoded.admin === true);
-    } catch (error) {
-        console.log("Verify admin error:", error);
-        return false;
-    }
-}
 
 /**
  * GET /api/admin/teams
  * Fetch all teams
  */
 export async function GET(req: NextRequest) {
-    if (!(await verifyAdmin(req))) {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (!(await verifyAdminSession(req))) {
+        return NextResponse.json({ success: false, message: "Unauthorized or session expired" }, { status: 401 });
     }
 
     try {
@@ -49,8 +30,8 @@ export async function GET(req: NextRequest) {
  * Create a new team
  */
 export async function POST(req: NextRequest) {
-    if (!(await verifyAdmin(req))) {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (!(await verifyAdminSession(req))) {
+        return NextResponse.json({ success: false, message: "Unauthorized or session expired" }, { status: 401 });
     }
 
     try {
