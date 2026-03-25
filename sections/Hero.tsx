@@ -173,9 +173,7 @@ export default function Hero() {
                         </a>
                     ) : isProblemSelectionOpen() ? (
                         <a
-                            href={STUDENT_REG_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href="/auth"
                             className="group relative px-8 py-4 rounded-xl font-inter font-bold text-base text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-meta"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-metaverse-navy via-metaverse-plum to-metaverse-pink" />
