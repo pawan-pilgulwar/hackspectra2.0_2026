@@ -143,7 +143,7 @@ export const TRACKS = [
     description: "Empowerment-focused innovations.",
     color: "from-metaverse-pink to-metaverse-plum",
     glow: "shadow-meta-pink",
-  // },
+  },
   // {
   //   icon: "💡",
   //   title: "Student Innovation",
