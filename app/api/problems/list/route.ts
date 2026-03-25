@@ -57,10 +57,8 @@ export async function GET(req: NextRequest) {
       .select("title description track maxTeams selectedTeams isActive")
       .sort({ track: 1, title: 1 });
 
-    // Filter out problems that are full
-    // Only return problems where selectedTeams.length < maxTeams
+    // Only return active problems
     const problemsWithSlots = problems
-      .filter((p) => p.selectedTeams.length < p.maxTeams)
       .map((p) => ({
         _id: p._id.toString(),
         title: p.title,

@@ -656,7 +656,9 @@ export default function ProblemsPage() {
                         key={problem._id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="glass rounded-2xl p-6 border border-metaverse-pink/10 hover:border-metaverse-pink/30 transition-all"
+                        className={`glass rounded-2xl p-6 border border-metaverse-pink/10 hover:border-metaverse-pink/30 transition-all ${
+                          problem.remainingSlots === 0 ? "opacity-60 grayscale-[0.4]" : ""
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-4">
                           <h4 className="font-orbitron font-semibold text-lg text-white flex-1">
