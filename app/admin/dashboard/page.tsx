@@ -16,6 +16,8 @@ import {
     FiDownload
 } from "react-icons/fi";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type DashboardStats = {
     totalTeams: number;
@@ -35,8 +37,10 @@ type Team = {
     selectedProblem?: {
         problemId: string;
         problemTitle: string;
+        problemDescription: string;
         track: string;
     };
+    selectedTrack?: string;
     customProblemStatement?: {
         title: string;
         description: string;
@@ -92,6 +96,7 @@ export default function AdminDashboardOverview() {
         type: "info",
         isVisible: false,
     });
+    const [exportFormat, setExportFormat] = useState<"excel" | "pdf">("excel");
 
     const tracks = [
         "Agriculture",
@@ -148,19 +153,68 @@ export default function AdminDashboardOverview() {
             const res = await fetch("/api/admin/teams");
             const data = await res.json();
             if (data.success) {
-                const exportData = data.teams.map((t: Team) => ({
-                    "Team Name": t.teamName,
-                    "Leader Name": t.leaderName,
-                    "Leader Email": t.leaderEmail,
-                    "Team Members": t.teamMembers.join(", "),
-                    "Selected Problem": t.selectedProblem?.problemTitle || (t.customProblemStatement?.title ? `Custom: ${t.customProblemStatement.title}` : "None"),
-                }));
+                if (exportFormat === "excel") {
+                    const exportData = data.teams.map((t: Team) => ({
+                        "Team Name": t.teamName,
+                        "Leader Name": t.leaderName,
+                        "Leader Email": t.leaderEmail,
+                        "Team Members": t.teamMembers.join(", "),
+                        "Selected Problem": t.selectedProblem?.problemTitle || (t.customProblemStatement?.title ? `Custom: ${t.customProblemStatement.title}` : "None"),
+                    }));
 
-                const worksheet = XLSX.utils.json_to_sheet(exportData);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Teams");
-                XLSX.writeFile(workbook, `HackSpectra_Teams_${new Date().toISOString().split('T')[0]}.xlsx`);
-                showToast("Teams data exported! 📊", "success");
+                    const worksheet = XLSX.utils.json_to_sheet(exportData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Teams");
+                    XLSX.writeFile(workbook, `HackSpectra_Teams_${new Date().toISOString().split('T')[0]}.xlsx`);
+                } else {
+                    // PDF Export
+                    const doc = new jsPDF();
+                    doc.setFontSize(20);
+                    doc.setTextColor(236, 72, 153); // metaverse-pink
+                    doc.text("HackSpectra 2.0 - Teams Report", 14, 22);
+                    doc.setFontSize(10);
+                    doc.setTextColor(100);
+                    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+                    // Group by track
+                    const tracks = Array.from(new Set(data.teams.map((t: Team) => (t.selectedProblem?.track || t.selectedTrack || "Unselected")))) as string[];
+                    
+                    let yPos = 40;
+                    tracks.sort().forEach((track) => {
+                        const trackTeams = data.teams.filter((t: Team) => (t.selectedProblem?.track || t.selectedTrack || "Unselected") === track);
+                        
+                        autoTable(doc, {
+                            startY: yPos,
+                            head: [[{ content: track.toUpperCase(), colSpan: 4, styles: { fillColor: [30, 41, 59], halign: 'center' } }]],
+                            body: trackTeams.map((t: Team) => [
+                                t.teamName,
+                                t.leaderName,
+                                t.leaderEmail,
+                                t.selectedProblem?.problemTitle || (t.customProblemStatement?.title ? `Custom: ${t.customProblemStatement.title}` : "None")
+                            ]),
+                            columns: [
+                                { header: "Team Name", dataKey: 0 },
+                                { header: "Leader", dataKey: 1 },
+                                { header: "Email", dataKey: 2 },
+                                { header: "Selection", dataKey: 3 }
+                            ],
+                            theme: 'grid',
+                            headStyles: { fillColor: [236, 72, 153], textColor: [255, 255, 255] },
+                            margin: { top: 35 },
+                            didDrawPage: (drawData) => {
+                                doc.setFontSize(10);
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                doc.text(`Page ${(doc.internal as any).getNumberOfPages()}`, drawData.settings.margin.left, doc.internal.pageSize.height - 10);
+                            }
+                        });
+                        
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        yPos = (doc as any).lastAutoTable.finalY + 10;
+                    });
+
+                    doc.save(`HackSpectra_Teams_${new Date().toISOString().split('T')[0]}.pdf`);
+                }
+                showToast(`Teams data exported as ${exportFormat.toUpperCase()}! 📊`, "success");
                 setIsExportModalOpen(false);
             }
         } catch (error) {
@@ -177,19 +231,61 @@ export default function AdminDashboardOverview() {
             const res = await fetch("/api/admin/problems");
             const data = await res.json();
             if (data.success) {
-                const exportData = data.problems.map((p: Problem) => ({
-                    "Problem Title": p.title,
-                    "Track": p.track,
-                    "Max Teams": p.maxTeams,
-                    "Selected Team Count": p.selectedTeams.length,
-                    "Remaining Slots": Math.max(0, p.maxTeams - p.selectedTeams.length),
-                }));
+                if (exportFormat === "excel") {
+                    const exportData = data.problems.map((p: Problem) => ({
+                        "Problem Title": p.title,
+                        "Track": p.track,
+                        "Max Teams": p.maxTeams,
+                        "Selected Team Count": p.selectedTeams.length,
+                        "Remaining Slots": Math.max(0, p.maxTeams - p.selectedTeams.length),
+                    }));
 
-                const worksheet = XLSX.utils.json_to_sheet(exportData);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Problem Statements");
-                XLSX.writeFile(workbook, `HackSpectra_Problems_${new Date().toISOString().split('T')[0]}.xlsx`);
-                showToast("Problem statements exported! 📊", "success");
+                    const worksheet = XLSX.utils.json_to_sheet(exportData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Problem Statements");
+                    XLSX.writeFile(workbook, `HackSpectra_Problems_${new Date().toISOString().split('T')[0]}.xlsx`);
+                } else {
+                    // PDF Export
+                    const doc = new jsPDF();
+                    doc.setFontSize(20);
+                    doc.setTextColor(236, 72, 153);
+                    doc.text("HackSpectra 2.0 - Problem Statements", 14, 22);
+                    doc.setFontSize(10);
+                    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+                    const tracks = Array.from(new Set(data.problems.map((p: Problem) => p.track))) as string[];
+                    
+                    let yPos = 40;
+                    tracks.sort().forEach((track) => {
+                        const trackProblems = data.problems.filter((p: Problem) => p.track === track);
+                        
+                        autoTable(doc, {
+                            startY: yPos,
+                            head: [[{ content: track.toUpperCase(), colSpan: 4, styles: { fillColor: [30, 41, 59], halign: 'center' } }]],
+                            body: trackProblems.map((p: Problem) => [
+                                p.title,
+                                p.maxTeams,
+                                p.selectedTeams.length,
+                                Math.max(0, p.maxTeams - p.selectedTeams.length)
+                            ]),
+                            columns: [
+                                { header: "Problem Title", dataKey: 0 },
+                                { header: "Max", dataKey: 1 },
+                                { header: "Used", dataKey: 2 },
+                                { header: "Left", dataKey: 3 }
+                            ],
+                            theme: 'grid',
+                            headStyles: { fillColor: [236, 72, 153], textColor: [255, 255, 255] },
+                            margin: { top: 35 }
+                        });
+                        
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        yPos = (doc as any).lastAutoTable.finalY + 10;
+                    });
+
+                    doc.save(`HackSpectra_Problems_${new Date().toISOString().split('T')[0]}.pdf`);
+                }
+                showToast(`Problem statements exported as ${exportFormat.toUpperCase()}! 📊`, "success");
                 setIsExportModalOpen(false);
             }
         } catch (error) {
@@ -663,6 +759,32 @@ export default function AdminDashboardOverview() {
                                 <button onClick={() => setIsExportModalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
                                     <FiX className="text-2xl" />
                                 </button>
+                            </div>
+
+                            <div className="px-8 pt-6">
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1 block mb-3">Format</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => setExportFormat("excel")}
+                                        className={`py-3 rounded-xl font-inter font-bold border transition-all ${
+                                            exportFormat === "excel" 
+                                            ? "bg-metaverse-pink/20 border-metaverse-pink text-metaverse-pink" 
+                                            : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10"
+                                        }`}
+                                    >
+                                        Excel (.xlsx)
+                                    </button>
+                                    <button
+                                        onClick={() => setExportFormat("pdf")}
+                                        className={`py-3 rounded-xl font-inter font-bold border transition-all ${
+                                            exportFormat === "pdf" 
+                                            ? "bg-metaverse-pink/20 border-metaverse-pink text-metaverse-pink" 
+                                            : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10"
+                                        }`}
+                                    >
+                                        PDF (.pdf)
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="p-8 space-y-4">

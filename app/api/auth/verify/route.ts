@@ -93,11 +93,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // FIX ISSUE 2: Generate JWT token (email-only)
+    // Generate unique session ID for single active login
+    const sessionId = crypto.randomUUID();
+    team.activeSessionId = sessionId;
+    await team.save();
+
+    // FIX ISSUE 2: Generate JWT token (email and session)
     let token;
     try {
       token = generateToken({
         leaderEmail: team.leaderEmail,
+        sessionId: sessionId,
       });
     } catch (jwtError) {
       console.error("JWT generation failed:", jwtError);

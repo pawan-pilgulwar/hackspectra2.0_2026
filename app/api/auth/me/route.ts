@@ -48,6 +48,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Validate active session
+    if (team.activeSessionId !== payload.sessionId) {
+      return NextResponse.json(
+        { success: false, message: "Session expired. Another login detected.", code: "SESSION_EXPIRED" },
+        { status: 401 }
+      );
+    }
+
     // Populate selected problem details if exists
     let selectedProblem = null;
     if (team.selectedProblem) {

@@ -12,6 +12,7 @@ if (!JWT_SECRET) {
 
 export interface JWTPayload {
   leaderEmail: string;
+  sessionId: string;
 }
 
 /**

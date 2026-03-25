@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Find team using JWT payload (email only)
+    // Find team using JWT payload (email and session)
     const team = await Team.findOne({ 
       leaderEmail: payload.leaderEmail,
     });
@@ -84,6 +84,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, message: "Team not found" },
         { status: 404 }
+      );
+    }
+
+    // Validate active session
+    if (team.activeSessionId !== payload.sessionId) {
+      return NextResponse.json(
+        { success: false, message: "Session expired. Another login detected.", code: "SESSION_EXPIRED" },
+        { status: 401 }
       );
     }
 

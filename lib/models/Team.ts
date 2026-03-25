@@ -25,6 +25,7 @@ export interface ITeam extends Document {
   rejectionMessage: string | null;
   isCustomProblemRejected: boolean;
   selectedAt: Date | null;
+  activeSessionId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -126,6 +127,10 @@ const TeamSchema = new Schema<ITeam>(
     },
     selectedAt: {
       type: Date,
+      default: null,
+    },
+    activeSessionId: {
+      type: String,
       default: null,
     },
   },

@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Find team using JWT payload (email only)
+    // Find team using JWT payload (email and session)
     const team = await Team.findOne({ 
       leaderEmail: payload.leaderEmail,
     });
@@ -76,6 +76,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, message: "Team not found" },
         { status: 404 }
+      );
+    }
+
+    // Validate active session
+    if (team.activeSessionId !== payload.sessionId) {
+      return NextResponse.json(
+        { success: false, message: "Session expired. Another login detected.", code: "SESSION_EXPIRED" },
+        { status: 401 }
       );
     }
 
@@ -110,116 +118,110 @@ export async function POST(req: NextRequest) {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // CHECK 2: Verify problem has NOT reached team limit
+    // START TRANSACTION: Ensure atomicity across collections
     // ═══════════════════════════════════════════════════════════════
-    if (problem.selectedTeams.length >= problem.maxTeams) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: `This problem statement is full. Maximum ${problem.maxTeams} teams allowed.` 
-        },
-        { status: 400 }
-      );
-    }
+    const mongoose = (await import("mongoose")).default;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Check if this team is already in selectedTeams (duplicate prevention)
-    const alreadySelected = problem.selectedTeams.some(
-      (selectedTeam) => selectedTeam.teamId === team.teamId
-    );
-
-    if (alreadySelected) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "This team has already selected this problem statement." 
-        },
-        { status: 400 }
-      );
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // ATOMIC UPDATE: Add team to problem's selectedTeams
-    // ═══════════════════════════════════════════════════════════════
-    // Use $push with $position to add team, but only if:
-    // - selectedTeams array length is still less than maxTeams
-    // - This team is not already in the array
-    const updatedProblem = await ProblemStatement.findOneAndUpdate(
-      {
-        _id: problemId,
-        isActive: true,
-        // Ensure we haven't exceeded limit (atomic check)
-        $expr: { $lt: [{ $size: "$selectedTeams" }, "$maxTeams"] },
-        // Ensure this team isn't already in the array
-        "selectedTeams.teamId": { $ne: team.teamId },
-      },
-      {
-        $push: {
-          selectedTeams: {
-            teamId: team.teamId,
-            teamName: team.teamName,
-          },
-        },
-      },
-      { 
-        new: true,
-        runValidators: true, // Run schema validators
-      }
-    );
-
-    // If update failed, problem became full or team was already added
-    if (!updatedProblem) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Problem statement became full or selection conflict occurred. Please try another problem." 
-        },
-        { status: 409 }
-      );
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // UPDATE TEAM: Store selected problem details
-    // ═══════════════════════════════════════════════════════════════
     try {
-      team.selectedTrack = problem.track;
-      team.selectedProblemId = problemId; // Backward compatibility
-      team.selectedProblem = {
-        problemId: problemId,
-        problemTitle: problem.title,
-        problemDescription: problem.description,
-        problemTrack: problem.track,
-      };
-      team.selectedAt = new Date();
-      await team.save();
-    } catch (teamUpdateError) {
-      // If team update fails, rollback problem update
-      console.error("Team update failed, rolling back problem update:", teamUpdateError);
-      
-      await ProblemStatement.findByIdAndUpdate(
-        problemId,
+      // 1. Update ProblemStatement (Atomic push with condition)
+      const updatedProblem = await ProblemStatement.findOneAndUpdate(
         {
-          $pull: {
-            selectedTeams: { teamId: team.teamId },
+          _id: problemId,
+          isActive: true,
+          $expr: { $lt: [{ $size: "$selectedTeams" }, "$maxTeams"] },
+          "selectedTeams.teamId": { $ne: team.teamId },
+        },
+        {
+          $push: {
+            selectedTeams: {
+              teamId: team.teamId,
+              teamName: team.teamName,
+            },
           },
+        },
+        { 
+          new: true,
+          session, // Use the transaction session
         }
       );
+
+      if (!updatedProblem) {
+        throw new Error("PROBLEM_FULL_OR_CONFLICT");
+      }
+
+      // 2. Update Team
+      const updatedTeam = await Team.findOneAndUpdate(
+        { 
+          _id: team._id,
+          // Extra safety: ensure team hasn't selected anything yet (double check)
+          selectedProblem: null,
+          customProblemStatement: null 
+        },
+        {
+          selectedTrack: problem.track,
+          selectedProblemId: problemId,
+          selectedProblem: {
+            problemId: problemId,
+            problemTitle: problem.title,
+            problemDescription: problem.description,
+            problemTrack: problem.track,
+          },
+          selectedAt: new Date(),
+        },
+        { 
+          new: true,
+          session, // Use the transaction session
+        }
+      );
+
+      if (!updatedTeam) {
+        throw new Error("TEAM_ALREADY_SELECTED_OR_NOT_FOUND");
+      }
+
+      // 3. Commit Transaction
+      await session.commitTransaction();
+
+      return NextResponse.json({
+        success: true,
+        message: "Problem selected successfully",
+        data: {
+          track: problem.track,
+          problemTitle: problem.title,
+          problemDescription: problem.description,
+          remainingSlots: updatedProblem.maxTeams - updatedProblem.selectedTeams.length,
+        },
+      });
+    } catch (txError) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const error = txError as any;
+      // 4. Abort Transaction on error
+      await session.abortTransaction();
+      
+      console.error("Selection transaction failed:", error);
+
+      if (error.message === "PROBLEM_FULL_OR_CONFLICT") {
+        return NextResponse.json(
+          { success: false, message: "Problem statement became full or selection conflict occurred." },
+          { status: 409 }
+        );
+      }
+
+      if (error.message === "TEAM_ALREADY_SELECTED_OR_NOT_FOUND") {
+        return NextResponse.json(
+          { success: false, message: "Team has already made a selection or team not found." },
+          { status: 400 }
+        );
+      }
 
       return NextResponse.json(
         { success: false, message: "Failed to complete selection. Please try again." },
         { status: 500 }
       );
+      // 5. End Session
+      await session.endSession();
     }
-
-    return NextResponse.json({
-      success: true,
-      message: "Problem selected successfully",
-      data: {
-        track: problem.track,
-        problemTitle: problem.title,
-        problemDescription: problem.description,
-        remainingSlots: updatedProblem.maxTeams - updatedProblem.selectedTeams.length,
-      },
-    });
   } catch (error) {
     console.error("Problem selection error:", error);
     return NextResponse.json(
