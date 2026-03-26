@@ -413,7 +413,7 @@ export default function ProblemsPage() {
                         }`}>
                         {teamData.customProblemStatement?.status === "pending"
                           ? "Submission Under Review"
-                          : "Selection Locked"}
+                          : "Your problem statement is selected, now you start working on it."}
                       </h3>
                       {teamData.customProblemStatement ? (
                         <div>
